@@ -1,32 +1,42 @@
+import { Phone, Mail, MapPin } from "lucide-react";
+import heroTeam from "@/assets/hero-team.jpg";
+
 const contacts = [
-  "316 830 8779",
-  "asesoriamsas@gmail.com",
-  "Cll. 5 No. OA-114 2° Piso, Cúcuta",
+  { icon: Phone, text: "316 830 8779" },
+  { icon: Mail, text: "asesoriamsas@gmail.com" },
+  { icon: MapPin, text: "Cll. 5 No. OA-114 2° Piso, Cúcuta" },
 ];
 
 const CTA = () => (
-  <section id="contact" className="gradient-cta py-14 px-8 text-center">
-    <h2 className="text-2xl font-medium text-primary-foreground mb-3">
-      ¿Listo para llevar tu empresa al siguiente nivel?
-    </h2>
-    <p className="text-sm text-primary-foreground/65 mb-7 max-w-md mx-auto leading-relaxed">
-      Nuestro equipo de asesores está disponible para atenderte y diseñar una estrategia personalizada para tu negocio.
-    </p>
-    <div className="flex gap-3.5 justify-center flex-wrap">
-      <a href="#" className="bg-gold text-primary-foreground px-6 py-2.5 rounded text-sm font-medium hover:opacity-85 transition-opacity">
-        Solicitar asesoría
-      </a>
-      <a href="#" className="bg-ame-green text-primary-foreground px-6 py-2.5 rounded text-sm font-medium hover:opacity-85 transition-opacity">
-        Ver servicios
-      </a>
-    </div>
-    <div className="flex justify-center gap-8 mt-7 flex-wrap">
-      {contacts.map((c) => (
-        <div key={c} className="flex items-center gap-2 text-primary-foreground/60 text-xs">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#5DCAA5]" />
-          {c}
-        </div>
-      ))}
+  <section id="contact" className="relative overflow-hidden py-20 px-8 text-center">
+    <img src={heroTeam} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+    <div className="absolute inset-0 bg-gradient-to-br from-[hsl(214,30%,15%)]/90 via-[hsl(210,30%,25%)]/85 to-[hsl(160,67%,37%)]/30" />
+    <div className="relative z-10">
+      <span className="inline-block bg-gold/20 text-[#F5C775] text-xs font-semibold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm border border-gold/30">
+        ¿Listo para empezar?
+      </span>
+      <h2 className="text-2xl md:text-3xl font-semibold text-primary-foreground mb-3">
+        Lleva tu empresa al siguiente nivel
+      </h2>
+      <p className="text-sm text-primary-foreground/65 mb-8 max-w-md mx-auto leading-relaxed">
+        Nuestro equipo de asesores está disponible para atenderte y diseñar una estrategia personalizada para tu negocio.
+      </p>
+      <div className="flex gap-4 justify-center flex-wrap">
+        <a href="#" className="bg-gradient-to-r from-gold to-[#D4941F] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-gold/30 transition-all hover:-translate-y-0.5">
+          Solicitar asesoría
+        </a>
+        <a href="#services" className="bg-gradient-to-r from-ame-green to-[#169563] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-ame-green/30 transition-all hover:-translate-y-0.5">
+          Ver servicios
+        </a>
+      </div>
+      <div className="flex justify-center gap-8 mt-10 flex-wrap">
+        {contacts.map((c) => (
+          <div key={c.text} className="flex items-center gap-2.5 text-primary-foreground/70 text-xs bg-primary-foreground/5 backdrop-blur-sm rounded-full px-4 py-2 border border-primary-foreground/10">
+            <c.icon size={14} className="text-[#5DCAA5]" />
+            {c.text}
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 );
