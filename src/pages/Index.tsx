@@ -7,9 +7,11 @@ import About from "@/components/About";
 import Meetings from "@/components/Meetings";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
+import PageViewTracker from "@/components/PageViewTracker";
 
 const Index = () => (
   <div className="max-w-[1100px] mx-auto bg-card rounded-lg overflow-hidden border border-border">
+    <PageViewTracker />
     <TopBar />
     <Header />
     <Hero />
