@@ -11,6 +11,7 @@ import PageViewTracker from "@/components/PageViewTracker";
 
 const Index = () => (
   <div className="max-w-[1100px] mx-auto bg-card rounded-lg overflow-hidden border border-border">
+    <PageViewTracker />
     <TopBar />
     <Header />
     <Hero />
