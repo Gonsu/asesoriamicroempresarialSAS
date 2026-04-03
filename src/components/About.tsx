@@ -1,5 +1,5 @@
 import { Home } from "lucide-react";
-import aboutCucuta from "@/assets/about-cucuta.jpg";
+import aboutCucuta from "@/assets/cucuta-real.png";
 
 const badges = [
   { label: "Economía privada", cls: "bg-gold/15 text-[#854F0B] border border-gold/20" },
