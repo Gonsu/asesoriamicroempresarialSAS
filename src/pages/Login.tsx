@@ -12,9 +12,31 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+
+    if (result.error) {
+      setGoogleLoading(false);
+      toast({
+        title: "Error con Google",
+        description: "No se pudo iniciar sesión con Google.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (result.redirected) return;
+
+    navigate("/admin");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
