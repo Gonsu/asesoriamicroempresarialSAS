@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    --primary: 37 75% 41%;
+    --primary: 150 60% 26%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96%;
@@ -24,7 +24,7 @@
     --muted: 210 20% 96%;
     --muted-foreground: 215 15% 47%;
 
-    --accent: 160 67% 37%;
+    --accent: 150 50% 40%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -32,18 +32,18 @@
 
     --border: 214 20% 92%;
     --input: 214 20% 92%;
-    --ring: 37 75% 41%;
+    --ring: 150 60% 26%;
 
     --radius: 0.5rem;
 
     /* AME Brand tokens */
     --gold: 37 75% 41%;
     --gold-light: 37 80% 92%;
-    --green: 160 67% 37%;
-    --green-light: 90 40% 91%;
+    --green: 150 60% 26%;
+    --green-light: 150 40% 91%;
     --blue: 211 62% 54%;
     --blue-light: 211 60% 94%;
-    --teal-light: 160 50% 92%;
+    --teal-light: 150 50% 92%;
     --dark: 214 30% 15%;
     --mid: 210 30% 25%;
     --dark-surface: 214 40% 10%;
@@ -65,19 +65,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 214 30% 15%;
     --popover-foreground: 210 40% 98%;
-    --primary: 37 75% 41%;
+    --primary: 150 60% 26%;
     --primary-foreground: 0 0% 100%;
     --secondary: 217 33% 18%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 18%;
     --muted-foreground: 215 20% 65%;
-    --accent: 160 67% 37%;
+    --accent: 150 50% 40%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     --border: 217 33% 18%;
     --input: 217 33% 18%;
-    --ring: 37 75% 41%;
+    --ring: 150 60% 26%;
   }
 }
 

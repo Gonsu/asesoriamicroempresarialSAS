@@ -2,10 +2,10 @@ import { Home } from "lucide-react";
 import aboutCucuta from "@/assets/cucuta-real.png";
 
 const badges = [
-  { label: "Economía privada", cls: "bg-gold/15 text-[#854F0B] border border-gold/20" },
-  { label: "Sector financiero", cls: "bg-ame-green/15 text-[#3B6D11] border border-ame-green/20" },
+  { label: "Economía privada", cls: "bg-primary/15 text-[#1B6B3A] border border-primary/20" },
+  { label: "Sector financiero", cls: "bg-accent/15 text-[#2A8C5A] border border-accent/20" },
   { label: "Consultoría", cls: "bg-ame-blue/15 text-[#185FA5] border border-ame-blue/20" },
-  { label: "Registro legal", cls: "bg-gold/15 text-[#854F0B] border border-gold/20" },
+  { label: "Registro legal", cls: "bg-primary/15 text-[#1B6B3A] border border-primary/20" },
 ];
 
 const About = () => (
@@ -23,13 +23,13 @@ const About = () => (
         <div className="absolute inset-0 bg-gradient-to-t from-[hsl(214,30%,15%)]/80 via-transparent to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center gap-2 mb-2">
-            <Home className="w-5 h-5 text-[#F5C775]" />
+            <Home className="w-5 h-5 text-[#5DCAA5]" />
             <span className="text-primary-foreground text-sm font-medium">Nuestra sede</span>
           </div>
           <p className="text-primary-foreground/80 text-xs">Cúcuta, Norte de Santander — Colombia</p>
           <div className="flex gap-6 mt-4">
             {[
-              { val: "2016", label: "Fundación", color: "text-[#F5C775]" },
+              { val: "2016", label: "Fundación", color: "text-[#5DCAA5]" },
               { val: "SAS", label: "Tipo societario", color: "text-[#5DCAA5]" },
               { val: "Col", label: "Sede nacional", color: "text-[#85B7EB]" },
             ].map((item, i) => (
@@ -46,7 +46,7 @@ const About = () => (
       </div>
 
       <div>
-        <span className="inline-block bg-gold/10 text-gold text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
+        <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
           Quiénes somos
         </span>
         <h2 className="text-2xl font-semibold text-card-foreground mb-4">Asesoría Microempresarial S.A.S.</h2>
