@@ -47,41 +47,33 @@ const Hero = () => {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Background image with overlay */}
       {slides.map((s, i) => (
         <div
           key={i}
           className="absolute inset-0 transition-opacity duration-700"
           style={{ opacity: i === current ? 1 : 0 }}
         >
-          <img
-            src={s.image}
-            alt=""
-            className="w-full h-full object-cover"
-            width={1280}
-            height={720}
-          />
+          <img src={s.image} alt="" className="w-full h-full object-cover" width={1280} height={720} />
           <div className="absolute inset-0 bg-gradient-to-r from-[hsl(214,30%,15%)]/90 via-[hsl(214,30%,15%)]/75 to-[hsl(210,30%,25%)]/60" />
         </div>
       ))}
 
-      {/* Content */}
       <div className="relative z-10 px-8 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <div className="inline-block bg-gold/20 text-[#F5C775] text-xs font-medium px-3 py-1 rounded-full mb-5 backdrop-blur-sm border border-gold/30">
+          <div className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-5 backdrop-blur-sm border border-primary/30">
             ✦ Asesoría Microempresarial desde 2016
           </div>
           <h2 className="text-3xl md:text-[40px] font-semibold text-primary-foreground leading-tight mb-5">
-            {slide.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F5C775] to-[#E8A835]">{slide.highlight}</span>
+            {slide.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]">{slide.highlight}</span>
           </h2>
           <p className="text-primary-foreground/70 text-sm leading-relaxed mb-8 max-w-md">
             {slide.desc}
           </p>
           <div className="flex gap-3 flex-wrap">
-            <a href="#services" className="bg-gradient-to-r from-gold to-[#D4941F] text-primary-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-gold/30 transition-all hover:-translate-y-0.5">
+            <a href="#services" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
               Conocer servicios
             </a>
-            <a href="#contact" className="bg-gradient-to-r from-ame-green to-[#169563] text-primary-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-ame-green/30 transition-all hover:-translate-y-0.5">
+            <a href="#contact" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">
               Contáctenos
             </a>
             <a href="#about" className="border-2 border-primary-foreground/30 text-primary-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:bg-primary-foreground/10 transition-all backdrop-blur-sm">
@@ -89,7 +81,6 @@ const Hero = () => {
             </a>
           </div>
 
-          {/* Carousel controls */}
           <div className="flex items-center gap-4 mt-8">
             <button onClick={prev} className="w-10 h-10 rounded-full border border-primary-foreground/30 flex items-center justify-center text-primary-foreground/70 hover:bg-primary-foreground/10 transition-colors">
               <ChevronLeft size={18} />
@@ -99,7 +90,7 @@ const Hero = () => {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`h-2 rounded-full transition-all ${i === current ? "w-8 bg-gold" : "w-2 bg-primary-foreground/30"}`}
+                  className={`h-2 rounded-full transition-all ${i === current ? "w-8 bg-primary" : "w-2 bg-primary-foreground/30"}`}
                 />
               ))}
             </div>
@@ -109,17 +100,16 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Stats panel */}
         <div className="bg-primary-foreground/[0.08] backdrop-blur-md rounded-2xl border border-primary-foreground/15 p-7 shadow-2xl">
           <div className="grid grid-cols-2 gap-3.5 mb-3.5">
             {stats.map((s) => (
-              <div key={s.label} className="bg-gradient-to-br from-primary-foreground/[0.1] to-primary-foreground/[0.03] rounded-xl p-5 text-center border border-primary-foreground/10 hover:border-gold/40 transition-colors">
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#F5C775] to-[#E8A835] leading-none">{s.num}</div>
+              <div key={s.label} className="bg-gradient-to-br from-primary-foreground/[0.1] to-primary-foreground/[0.03] rounded-xl p-5 text-center border border-primary-foreground/10 hover:border-primary/40 transition-colors">
+                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#5DCAA5] to-[#1B6B3A] leading-none">{s.num}</div>
                 <div className="text-[11px] text-primary-foreground/55 mt-2 tracking-wide">{s.label}</div>
               </div>
             ))}
           </div>
-          <div className="bg-gradient-to-r from-ame-green/20 to-ame-green/10 border-l-[3px] border-ame-green rounded-r-lg px-4 py-4">
+          <div className="bg-primary/20 border-l-[3px] border-primary rounded-r-lg px-4 py-4">
             <p className="text-xs italic text-primary-foreground/80 leading-relaxed">
               "Constituida conforme a las leyes de la República de Colombia, comprometida con el desarrollo económico regional."
             </p>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import logoAme from "@/assets/logo-ame.png";
 
 const navLinks = [
   { label: "Inicio", href: "#", active: true },
@@ -15,9 +16,7 @@ const Header = () => {
   return (
     <div className="bg-ame-dark px-8 py-4 flex justify-between items-center relative">
       <div className="flex items-center gap-3.5">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-[#D4941F] flex items-center justify-center font-bold text-lg text-primary-foreground tracking-wider shadow-lg shadow-gold/30">
-          A
-        </div>
+        <img src={logoAme} alt="AME S.A.S. Logo" className="h-12 w-auto" />
         <div>
           <h1 className="text-base font-semibold tracking-[2px] text-primary-foreground">AME S.A.S.</h1>
           <p className="text-[10px] opacity-60 tracking-wider mt-0.5 text-primary-foreground">ASESORÍA MICROEMPRESARIAL</p>
@@ -31,8 +30,8 @@ const Header = () => {
             href={link.href}
             className={`text-xs px-4 py-2 rounded-lg transition-all tracking-wide font-medium ${
               link.active
-                ? "bg-gold/20 text-[#F5C775] border border-gold/30"
-                : "text-primary-foreground/75 hover:bg-gold/15 hover:text-[#F5C775]"
+                ? "bg-primary/20 text-primary border border-primary/30"
+                : "text-primary-foreground/75 hover:bg-primary/15 hover:text-primary"
             }`}
           >
             {link.label}
@@ -53,8 +52,8 @@ const Header = () => {
               onClick={() => setMobileOpen(false)}
               className={`text-sm px-4 py-2.5 rounded-lg transition-all ${
                 link.active
-                  ? "bg-gold/20 text-[#F5C775]"
-                  : "text-primary-foreground/75 hover:bg-gold/15 hover:text-[#F5C775]"
+                  ? "bg-primary/20 text-primary"
+                  : "text-primary-foreground/75 hover:bg-primary/15 hover:text-primary"
               }`}
             >
               {link.label}

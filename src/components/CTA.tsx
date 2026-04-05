@@ -10,9 +10,9 @@ const contacts = [
 const CTA = () => (
   <section id="contact" className="relative overflow-hidden py-20 px-8 text-center">
     <img src={heroTeam} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-    <div className="absolute inset-0 bg-gradient-to-br from-[hsl(214,30%,15%)]/90 via-[hsl(210,30%,25%)]/85 to-[hsl(160,67%,37%)]/30" />
+    <div className="absolute inset-0 bg-gradient-to-br from-[hsl(214,30%,15%)]/90 via-[hsl(210,30%,25%)]/85 to-[hsl(150,60%,26%)]/30" />
     <div className="relative z-10">
-      <span className="inline-block bg-gold/20 text-[#F5C775] text-xs font-semibold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm border border-gold/30">
+      <span className="inline-block bg-primary/20 text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm border border-primary/30">
         ¿Listo para empezar?
       </span>
       <h2 className="text-2xl md:text-3xl font-semibold text-primary-foreground mb-3">
@@ -22,10 +22,10 @@ const CTA = () => (
         Nuestro equipo de asesores está disponible para atenderte y diseñar una estrategia personalizada para tu negocio.
       </p>
       <div className="flex gap-4 justify-center flex-wrap">
-        <a href="#" className="bg-gradient-to-r from-gold to-[#D4941F] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-gold/30 transition-all hover:-translate-y-0.5">
+        <a href="#" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
           Solicitar asesoría
         </a>
-        <a href="#services" className="bg-gradient-to-r from-ame-green to-[#169563] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-ame-green/30 transition-all hover:-translate-y-0.5">
+        <a href="#services" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">
           Ver servicios
         </a>
       </div>

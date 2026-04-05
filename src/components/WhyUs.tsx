@@ -1,21 +1,21 @@
 const pillars = [
-  { letter: "M", title: "Misión", desc: "Brindar soluciones financieras y administrativas que fortalezcan la competitividad de nuestros clientes.", dotClass: "bg-gradient-to-br from-[#FAEEDA] to-[#F5D5A0] text-[#854F0B] shadow-sm" },
+  { letter: "M", title: "Misión", desc: "Brindar soluciones financieras y administrativas que fortalezcan la competitividad de nuestros clientes.", dotClass: "bg-gradient-to-br from-[#D4F0E0] to-[#A8DFC0] text-[#1B6B3A] shadow-sm" },
   { letter: "V", title: "Visión", desc: "Ser la empresa líder en asesoría microempresarial en el nororiente colombiano para 2030.", dotClass: "bg-gradient-to-br from-[#EAF3DE] to-[#D4E8B8] text-[#3B6D11] shadow-sm" },
   { letter: "O", title: "Objetivos", desc: "Contribuir al desarrollo económico regional a través de servicios de alta calidad y acompañamiento continuo.", dotClass: "bg-gradient-to-br from-[#E6F1FB] to-[#C5DEFA] text-[#185FA5] shadow-sm" },
 ];
 
 const values = [
-  { name: "Transparencia", pct: 95, fillClass: "bg-gradient-to-r from-[#F5C775] to-[#E8A835]" },
-  { name: "Compromiso", pct: 98, fillClass: "bg-gradient-to-r from-[#5DCAA5] to-[#1D9E75]" },
+  { name: "Transparencia", pct: 95, fillClass: "bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]" },
+  { name: "Compromiso", pct: 98, fillClass: "bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]" },
   { name: "Excelencia", pct: 90, fillClass: "bg-gradient-to-r from-[#85B7EB] to-[#378ADD]" },
-  { name: "Innovación", pct: 85, fillClass: "bg-gradient-to-r from-[#F5C775] to-[#E8A835]" },
-  { name: "Responsabilidad", pct: 97, fillClass: "bg-gradient-to-r from-[#5DCAA5] to-[#1D9E75]" },
+  { name: "Innovación", pct: 85, fillClass: "bg-gradient-to-r from-[#5DCAA5] to-[#2A8C5A]" },
+  { name: "Responsabilidad", pct: 97, fillClass: "bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]" },
 ];
 
 const WhyUs = () => (
-  <section className="bg-gradient-to-br from-secondary via-secondary to-[hsl(37,80%,97%)] py-16 px-8">
+  <section className="bg-gradient-to-br from-secondary via-secondary to-[hsl(150,50%,95%)] py-16 px-8">
     <div className="text-center mb-10">
-      <span className="inline-block bg-gold/10 text-gold text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
+      <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
         ¿Por qué elegirnos?
       </span>
       <h3 className="text-2xl md:text-3xl font-semibold text-foreground">
@@ -29,7 +29,7 @@ const WhyUs = () => (
         </p>
         <div className="flex flex-col gap-4">
           {pillars.map((p) => (
-            <div key={p.letter} className="flex gap-4 items-start bg-card p-4 rounded-xl border border-border hover:border-gold/30 transition-colors shadow-sm">
+            <div key={p.letter} className="flex gap-4 items-start bg-card p-4 rounded-xl border border-border hover:border-primary/30 transition-colors shadow-sm">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold ${p.dotClass}`}>
                 {p.letter}
               </div>
@@ -43,7 +43,7 @@ const WhyUs = () => (
       </div>
 
       <div className="bg-gradient-to-br from-ame-dark to-ame-mid rounded-2xl p-7 shadow-xl">
-        <h3 className="text-lg font-semibold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-[#F5C775] to-[#E8A835]">
+        <h3 className="text-lg font-semibold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]">
           Nuestros principios
         </h3>
         {values.map((v) => (

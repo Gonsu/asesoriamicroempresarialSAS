@@ -6,25 +6,25 @@ import serviceConsulting from "@/assets/service-consulting.jpg";
 const services = [
   {
     icon: CircleDollarSign,
-    iconBg: "bg-gradient-to-br from-[#FAEEDA] to-[#F5D5A0]",
-    iconColor: "text-gold",
+    iconBg: "bg-gradient-to-br from-[#D4F0E0] to-[#A8DFC0]",
+    iconColor: "text-primary",
     title: "Asesoría financiera",
     desc: "Gestión de créditos, planeación presupuestal y estrategias de inversión adaptadas al tamaño y sector de tu empresa.",
     image: serviceFinancial,
-    accent: "group-hover:border-gold",
+    accent: "group-hover:border-primary",
     tag: "Finanzas",
-    tagColor: "bg-gold/15 text-gold",
+    tagColor: "bg-primary/15 text-primary",
   },
   {
     icon: LayoutGrid,
     iconBg: "bg-gradient-to-br from-[#EAF3DE] to-[#D4E8B8]",
-    iconColor: "text-ame-green",
+    iconColor: "text-accent",
     title: "Gestión administrativa",
     desc: "Organización de procesos, gestión documental, cumplimiento normativo y fortalecimiento de la estructura organizacional.",
     image: serviceAdmin,
-    accent: "group-hover:border-ame-green",
+    accent: "group-hover:border-accent",
     tag: "Administración",
-    tagColor: "bg-ame-green/15 text-ame-green",
+    tagColor: "bg-accent/15 text-accent",
   },
   {
     icon: Users,
@@ -42,7 +42,7 @@ const services = [
 const Services = () => (
   <section id="services" className="py-16 px-8 bg-gradient-to-b from-card to-secondary/50">
     <div className="text-center mb-12">
-      <span className="inline-block bg-gold/10 text-gold text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
+      <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
         Lo que ofrecemos
       </span>
       <h3 className="text-2xl md:text-3xl font-semibold text-card-foreground mb-3">
@@ -59,18 +59,9 @@ const Services = () => (
           className={`group border border-border rounded-2xl bg-card overflow-hidden hover:-translate-y-1 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl ${s.accent}`}
         >
           <div className="relative h-48 overflow-hidden">
-            <img
-              src={s.image}
-              alt={s.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
-              width={800}
-              height={600}
-            />
+            <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" width={800} height={600} />
             <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
-            <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${s.tagColor} backdrop-blur-sm`}>
-              {s.tag}
-            </span>
+            <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${s.tagColor} backdrop-blur-sm`}>{s.tag}</span>
           </div>
           <div className="p-6">
             <div className={`w-11 h-11 rounded-xl ${s.iconBg} flex items-center justify-center mb-4 shadow-sm`}>
@@ -78,7 +69,7 @@ const Services = () => (
             </div>
             <h4 className="text-base font-semibold text-card-foreground mb-2">{s.title}</h4>
             <p className="text-xs text-muted-foreground leading-relaxed mb-4">{s.desc}</p>
-            <a href="#contact" className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold group-hover:gap-2.5 transition-all">
+            <a href="#contact" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary group-hover:gap-2.5 transition-all">
               Más información <ArrowRight size={14} />
             </a>
           </div>
