@@ -16,8 +16,8 @@ const Header = () => {
   return (
     <div className="bg-ame-dark px-8 py-4 flex justify-between items-center relative">
       <div className="flex items-center gap-3.5">
-        <img src={logoAme} alt="AME S.A.S. Logo" className="h-12 w-auto" />
-        <div>
+        <img src={logoAme} alt="AME S.A.S. Logo" className="h-16 md:h-12 w-auto" />
+        <div className="hidden md:block">
           <h1 className="text-base font-semibold tracking-[2px] text-primary-foreground">AME S.A.S.</h1>
           <p className="text-[10px] opacity-60 tracking-wider mt-0.5 text-primary-foreground">ASESORÍA MICROEMPRESARIAL</p>
         </div>

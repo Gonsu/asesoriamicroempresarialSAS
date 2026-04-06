@@ -1,4 +1,5 @@
 import { CircleDollarSign, LayoutGrid, Users, ArrowRight } from "lucide-react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import serviceFinancial from "@/assets/service-financial.jpg";
 import serviceAdmin from "@/assets/service-admin.jpg";
 import serviceConsulting from "@/assets/service-consulting.jpg";
@@ -39,44 +40,47 @@ const services = [
   },
 ];
 
-const Services = () => (
-  <section id="services" className="py-16 px-8 bg-gradient-to-b from-card to-secondary/50">
-    <div className="text-center mb-12">
-      <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
-        Lo que ofrecemos
-      </span>
-      <h3 className="text-2xl md:text-3xl font-semibold text-card-foreground mb-3">
-        Servicios diseñados para tu negocio
-      </h3>
-      <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
-        Combinamos experiencia financiera, gestión administrativa y asesoría estratégica para llevar tu empresa al siguiente nivel.
-      </p>
-    </div>
-    <div className="grid md:grid-cols-3 gap-6">
-      {services.map((s) => (
-        <div
-          key={s.title}
-          className={`group border border-border rounded-2xl bg-card overflow-hidden hover:-translate-y-1 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl ${s.accent}`}
-        >
-          <div className="relative h-48 overflow-hidden">
-            <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" width={800} height={600} />
-            <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
-            <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${s.tagColor} backdrop-blur-sm`}>{s.tag}</span>
-          </div>
-          <div className="p-6">
-            <div className={`w-11 h-11 rounded-xl ${s.iconBg} flex items-center justify-center mb-4 shadow-sm`}>
-              <s.icon className={`w-5 h-5 ${s.iconColor}`} />
+const Services = () => {
+  const ref = useScrollReveal();
+  return (
+    <section id="services" ref={ref} className="py-16 px-8 bg-gradient-to-b from-card to-secondary/50">
+      <div className="text-center mb-12">
+        <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
+          Lo que ofrecemos
+        </span>
+        <h3 className="text-2xl md:text-3xl font-semibold text-card-foreground mb-3">
+          Servicios diseñados para tu negocio
+        </h3>
+        <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
+          Combinamos experiencia financiera, gestión administrativa y asesoría estratégica para llevar tu empresa al siguiente nivel.
+        </p>
+      </div>
+      <div className="grid md:grid-cols-3 gap-6">
+        {services.map((s) => (
+          <div
+            key={s.title}
+            className={`group border border-border rounded-2xl bg-card overflow-hidden hover:-translate-y-1 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl ${s.accent}`}
+          >
+            <div className="relative h-48 overflow-hidden">
+              <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" width={800} height={600} />
+              <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
+              <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${s.tagColor} backdrop-blur-sm`}>{s.tag}</span>
             </div>
-            <h4 className="text-base font-semibold text-card-foreground mb-2">{s.title}</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-4">{s.desc}</p>
-            <a href="#contact" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary group-hover:gap-2.5 transition-all">
-              Más información <ArrowRight size={14} />
-            </a>
+            <div className="p-6">
+              <div className={`w-11 h-11 rounded-xl ${s.iconBg} flex items-center justify-center mb-4 shadow-sm`}>
+                <s.icon className={`w-5 h-5 ${s.iconColor}`} />
+              </div>
+              <h4 className="text-base font-semibold text-card-foreground mb-2">{s.title}</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-4">{s.desc}</p>
+              <a href="#contact" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary group-hover:gap-2.5 transition-all">
+                Más información <ArrowRight size={14} />
+              </a>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-  </section>
-);
+        ))}
+      </div>
+    </section>
+  );
+};
 
 export default Services;

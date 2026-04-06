@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Users } from "lucide-react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface Meeting {
   id: string;
@@ -14,6 +15,7 @@ interface Meeting {
 const Meetings = () => {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
+  const ref = useScrollReveal();
 
   useEffect(() => {
     const fetchMeetings = async () => {
@@ -37,7 +39,7 @@ const Meetings = () => {
   }
 
   return (
-    <section id="meetings" className="px-8 py-14 bg-secondary/50">
+    <section id="meetings" ref={ref} className="px-8 py-14 bg-secondary/50">
       <div className="text-center mb-10">
         <span className="text-[11px] font-semibold tracking-[3px] uppercase text-primary">
           Actividades
