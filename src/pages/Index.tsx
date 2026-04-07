@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 import PageViewTracker from "@/components/PageViewTracker";
 
 const Index = () => (
-  <div className="max-w-[1100px] mx-auto bg-card rounded-lg overflow-hidden border border-border">
+  <div id="main-scroll-container" className="max-w-[1100px] mx-auto bg-card rounded-lg overflow-y-auto overflow-x-hidden border border-border h-screen">
     <PageViewTracker />
     <TopBar />
     <Header />

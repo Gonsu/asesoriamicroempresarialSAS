@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import logoAme from "@/assets/logo-ame.png";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const empresaLinks = [
   { label: "Misión y Visión", href: "#empresa" },
@@ -21,6 +22,7 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileEmpresaOpen, setMobileEmpresaOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hidden = useScrollDirection();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -33,10 +35,20 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="bg-ame-dark px-8 py-4 flex justify-between items-center relative">
-      <div className="flex items-center gap-3.5">
-        <img src={logoAme} alt="AME S.A.S. Logo" className="h-16 md:h-12 w-auto" />
-        <div className="hidden md:block">
+    <div
+      className={`bg-ame-dark px-8 py-4 flex flex-col md:flex-row justify-between items-center relative sticky top-0 z-50 transition-transform duration-300 ease-in-out ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
+      {/* Mobile: large centered logo */}
+      <div className="md:hidden flex flex-col items-center w-full mb-3">
+        <img src={logoAme} alt="AME S.A.S. Logo" className="h-24 w-auto" />
+      </div>
+
+      {/* Desktop: logo + text */}
+      <div className="hidden md:flex items-center gap-3.5">
+        <img src={logoAme} alt="AME S.A.S. Logo" className="h-14 w-auto" />
+        <div>
           <h1 className="text-base font-semibold tracking-[2px] text-primary-foreground">AME S.A.S.</h1>
           <p className="text-[10px] opacity-60 tracking-wider mt-0.5 text-primary-foreground">ASESORÍA MICROEMPRESARIAL</p>
         </div>
@@ -88,7 +100,7 @@ const Header = () => {
         )}
       </nav>
 
-      <button className="md:hidden text-primary-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+      <button className="md:hidden text-primary-foreground absolute top-4 right-4" onClick={() => setMobileOpen(!mobileOpen)}>
         {mobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
