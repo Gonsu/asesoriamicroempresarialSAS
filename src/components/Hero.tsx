@@ -46,7 +46,7 @@ const Hero = () => {
   const slide = slides[current];
 
   return (
-    <section className="relative overflow-visible md:overflow-hidden md:h-[550px]">
+    <section className="relative overflow-hidden md:h-[550px]">
       {slides.map((s, i) => (
         <div
           key={i}
@@ -58,7 +58,7 @@ const Hero = () => {
         </div>
       ))}
 
-      <div className="relative z-10 px-6 md:px-8 py-10 md:py-24 grid md:grid-cols-2 gap-6 md:gap-10 items-start md:items-center h-full overflow-y-auto">
+      <div className="relative z-10 px-6 md:px-8 py-10 md:py-24 grid md:grid-cols-2 gap-6 md:gap-10 items-start md:items-center">
         <div>
           <div className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-4 backdrop-blur-sm border border-primary/30">
             ✦ Asesoría Microempresarial desde 2016
