@@ -42,7 +42,7 @@ const Header = () => {
           hidden ? "-translate-y-full" : "translate-y-0"
         }`}
       >
-        <img src={logoAme} alt="Asesoría Microempresarial S.A.S." className="h-28 w-auto max-w-[85%] object-contain" />
+        <img src={logoAme} alt="Asesoría Microempresarial S.A.S." className="h-32 w-auto max-w-[90%] object-contain" />
         <button className="absolute top-4 right-4 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>

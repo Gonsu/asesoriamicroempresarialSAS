@@ -46,7 +46,7 @@ const Hero = () => {
   const slide = slides[current];
 
   return (
-    <section className="relative overflow-hidden h-[850px] sm:h-[700px] md:h-[550px]">
+    <section className="relative overflow-hidden min-h-[780px] sm:min-h-[650px] md:h-[550px]">
       {slides.map((s, i) => (
         <div
           key={i}
