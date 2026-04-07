@@ -46,7 +46,7 @@ const Hero = () => {
   const slide = slides[current];
 
   return (
-    <section className="relative overflow-hidden h-[600px] md:h-[550px]">
+    <section className="relative overflow-hidden h-[850px] sm:h-[700px] md:h-[550px]">
       {slides.map((s, i) => (
         <div
           key={i}
@@ -58,30 +58,30 @@ const Hero = () => {
         </div>
       ))}
 
-      <div className="relative z-10 px-8 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <div className="relative z-10 px-6 md:px-8 py-10 md:py-24 grid md:grid-cols-2 gap-6 md:gap-10 items-start md:items-center h-full overflow-y-auto">
         <div>
-          <div className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-5 backdrop-blur-sm border border-primary/30">
+          <div className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-4 backdrop-blur-sm border border-primary/30">
             ✦ Asesoría Microempresarial desde 2016
           </div>
-          <h2 className="text-3xl md:text-[40px] font-semibold text-primary-foreground leading-tight mb-5">
+          <h2 className="text-2xl sm:text-3xl md:text-[40px] font-semibold text-primary-foreground leading-tight mb-4">
             {slide.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]">{slide.highlight}</span>
           </h2>
-          <p className="text-primary-foreground/70 text-sm leading-relaxed mb-8 max-w-md">
+          <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6 max-w-md">
             {slide.desc}
           </p>
           <div className="flex gap-3 flex-wrap">
-            <a href="#services" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
+            <a href="#services" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
               Conocer servicios
             </a>
-            <a href="#contact" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">
+            <a href="#contact" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">
               Contáctenos
             </a>
-            <a href="#about" className="border-2 border-primary-foreground/30 text-primary-foreground px-7 py-3 rounded-lg text-sm font-semibold hover:bg-primary-foreground/10 transition-all backdrop-blur-sm">
+            <a href="#about" className="border-2 border-primary-foreground/30 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary-foreground/10 transition-all backdrop-blur-sm">
               Nuestra empresa
             </a>
           </div>
 
-          <div className="flex items-center gap-4 mt-8">
+          <div className="flex items-center gap-4 mt-6">
             <button onClick={prev} className="w-10 h-10 rounded-full border border-primary-foreground/30 flex items-center justify-center text-primary-foreground/70 hover:bg-primary-foreground/10 transition-colors">
               <ChevronLeft size={18} />
             </button>
@@ -100,16 +100,16 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="bg-primary-foreground/[0.08] backdrop-blur-md rounded-2xl border border-primary-foreground/15 p-7 shadow-2xl">
-          <div className="grid grid-cols-2 gap-3.5 mb-3.5">
+        <div className="bg-primary-foreground/[0.08] backdrop-blur-md rounded-2xl border border-primary-foreground/15 p-5 md:p-7 shadow-2xl">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             {stats.map((s) => (
-              <div key={s.label} className="bg-gradient-to-br from-primary-foreground/[0.1] to-primary-foreground/[0.03] rounded-xl p-5 text-center border border-primary-foreground/10 hover:border-primary/40 transition-colors">
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#5DCAA5] to-[#1B6B3A] leading-none">{s.num}</div>
-                <div className="text-[11px] text-primary-foreground/55 mt-2 tracking-wide">{s.label}</div>
+              <div key={s.label} className="bg-gradient-to-br from-primary-foreground/[0.1] to-primary-foreground/[0.03] rounded-xl p-4 md:p-5 text-center border border-primary-foreground/10 hover:border-primary/40 transition-colors">
+                <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#5DCAA5] to-[#1B6B3A] leading-none">{s.num}</div>
+                <div className="text-[10px] md:text-[11px] text-primary-foreground/55 mt-1.5 tracking-wide">{s.label}</div>
               </div>
             ))}
           </div>
-          <div className="bg-primary/20 border-l-[3px] border-primary rounded-r-lg px-4 py-4">
+          <div className="bg-primary/20 border-l-[3px] border-primary rounded-r-lg px-4 py-3">
             <p className="text-xs italic text-primary-foreground/80 leading-relaxed">
               "Constituida conforme a las leyes de la República de Colombia, comprometida con el desarrollo económico regional."
             </p>
