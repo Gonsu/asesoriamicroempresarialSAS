@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, ArrowLeft, BarChart3, Calendar, FileText } from "lucide-react";
+import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote } from "lucide-react";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import MeetingsManager from "@/components/admin/MeetingsManager";
 import ContentEditor from "@/components/admin/ContentEditor";
+import TestimonialsManager from "@/components/admin/TestimonialsManager";
 
 const tabs = [
   { id: "dashboard", label: "Estadísticas", icon: BarChart3 },
   { id: "meetings", label: "Reuniones", icon: Calendar },
+  { id: "testimonials", label: "Testimonios", icon: MessageSquareQuote },
   { id: "content", label: "Contenido", icon: FileText },
 ] as const;
 
@@ -84,6 +86,7 @@ const Admin = () => {
       <main className="max-w-4xl mx-auto p-6">
         {activeTab === "dashboard" && <AdminDashboard />}
         {activeTab === "meetings" && <MeetingsManager />}
+        {activeTab === "testimonials" && <TestimonialsManager />}
         {activeTab === "content" && <ContentEditor />}
       </main>
     </div>

@@ -6,8 +6,10 @@ import WhyUs from "@/components/WhyUs";
 import CompanyDetails from "@/components/CompanyDetails";
 import About from "@/components/About";
 import Meetings from "@/components/Meetings";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import PageViewTracker from "@/components/PageViewTracker";
 
 const Index = () => (
@@ -21,8 +23,10 @@ const Index = () => (
     <CompanyDetails />
     <About />
     <Meetings />
+    <TestimonialsSection />
     <CTA />
     <Footer />
+    <FloatingWhatsApp />
   </div>
 );
 
