@@ -131,3 +131,12 @@
   animation: fade-in-up 0.6s ease-out 0.3s forwards;
   opacity: 0;
 }
+
+@keyframes wa-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+}
+
+.animate-wa-pulse {
+  animation: wa-pulse 7s ease-in-out infinite;
+}
