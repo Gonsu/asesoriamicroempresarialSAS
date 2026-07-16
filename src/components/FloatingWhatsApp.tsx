@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MessageCircle, X } from "lucide-react";
 
-const WA_LINK = "https://wa.me/3168308779";
+const WA_LINK = "https://wa.me/573168308779";
 const TOOLTIP_KEY = "waTooltipSeen";
 
 const FloatingWhatsApp = () => {

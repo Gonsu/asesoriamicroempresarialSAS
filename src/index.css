@@ -100,6 +100,17 @@
   .gradient-cta {
     background: linear-gradient(135deg, hsl(var(--dark)), hsl(var(--mid)));
   }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+}
+
+@layer base {
+  h1 { @apply text-4xl md:text-5xl font-semibold leading-tight; }
+  h2 { @apply text-2xl md:text-3xl font-semibold leading-tight; }
+  h3 { @apply text-xl md:text-2xl font-semibold; }
+  p  { @apply text-base leading-relaxed; }
 }
 
 @keyframes fade-in-up {

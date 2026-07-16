@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import logoAme from "@/assets/logo-ame.png";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { cn } from "@/lib/utils";
 
 const empresaLinks = [
-  { label: "Misión y Visión", href: "#empresa" },
-  { label: "Objetivos", href: "#objetivos" },
-  { label: "Quiénes somos", href: "#about" },
+  { label: "Quiénes somos", to: "/empresa#quienes" },
+  { label: "Misión y Visión", to: "/empresa#mision" },
+  { label: "Objetivos", to: "/empresa#objetivos" },
+  { label: "Comité asesor", to: "/empresa#comite" },
 ];
 
 const navLinks = [
-  { label: "Inicio", href: "#", active: true },
-  { label: "Nuestra empresa", href: "#empresa", dropdown: empresaLinks },
-  { label: "Servicios", href: "#services" },
-  { label: "Reuniones", href: "#meetings" },
-  { label: "Contáctenos", href: "#contact" },
+  { label: "Inicio", to: "/" },
+  { label: "Nuestra empresa", to: "/empresa", dropdown: empresaLinks },
+  { label: "Servicios", to: "/servicios" },
+  { label: "Reuniones", to: "/reuniones" },
+  { label: "Contáctenos", to: "/contacto" },
 ];
 
 const Header = () => {
@@ -23,6 +26,7 @@ const Header = () => {
   const [mobileEmpresaOpen, setMobileEmpresaOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hidden = useScrollDirection();
+  const location = useLocation();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -34,76 +38,84 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const linkClasses = (isActive: boolean) =>
+    cn(
+      "relative text-sm px-4 py-2 transition-colors font-medium tracking-normal",
+      isActive
+        ? "text-primary after:absolute after:bottom-0 after:left-4 after:right-4 after:h-[2px] after:bg-primary"
+        : "text-primary-foreground/85 hover:text-primary"
+    );
+
+  const isEmpresaActive = location.pathname === "/empresa";
+
   return (
     <>
-      {/* Mobile: Large logo banner like reference site */}
+      {/* Mobile: Large logo banner */}
       <div
-        className={`md:hidden bg-[#f5f0e8] flex items-center justify-center py-6 px-4 sticky top-0 z-50 transition-transform duration-300 ease-in-out border-b-4 border-[#8B6914] ${
+        className={cn(
+          "md:hidden bg-[#f5f0e8] flex items-center justify-center py-6 px-4 sticky top-0 z-50 transition-transform duration-300 ease-in-out border-b-2 border-primary/20",
           hidden ? "-translate-y-full" : "translate-y-0"
-        }`}
+        )}
       >
-        <img src={logoAme} alt="Asesoría Microempresarial S.A.S." className="h-32 w-auto max-w-[90%] object-contain" />
-        <button className="absolute top-4 right-4 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+        <img src={logoAme} alt="Asesoría Microempresarial S.A.S." className="h-28 w-auto max-w-[90%] object-contain" />
+        <button className="absolute top-4 right-4 text-foreground" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menú">
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {/* Desktop header */}
       <div
-        className={`hidden md:flex bg-ame-dark px-8 py-4 justify-between items-center sticky top-0 z-50 transition-transform duration-300 ease-in-out ${
+        className={cn(
+          "hidden md:flex bg-ame-dark px-8 py-3 justify-between items-center sticky top-0 z-50 transition-transform duration-300 ease-in-out shadow-sm",
           hidden ? "-translate-y-full" : "translate-y-0"
-        }`}
+        )}
       >
-        <div className="flex items-center gap-3.5">
-          <img src={logoAme} alt="AME S.A.S. Logo" className="h-14 w-auto" />
+        <NavLink to="/" className="flex items-center gap-3">
+          <img src={logoAme} alt="AME S.A.S. Logo" className="h-12 w-auto" />
           <div>
-            <h1 className="text-base font-semibold tracking-[2px] text-primary-foreground">AME S.A.S.</h1>
-            <p className="text-[10px] opacity-60 tracking-wider mt-0.5 text-primary-foreground">ASESORÍA MICROEMPRESARIAL</p>
+            <h1 className="text-base font-semibold text-primary-foreground leading-tight">AME S.A.S.</h1>
+            <p className="text-[11px] text-primary-foreground/60 leading-tight">Asesoría Microempresarial</p>
           </div>
-        </div>
+        </NavLink>
 
-        <nav className="flex gap-1">
+        <nav className="flex items-center">
           {navLinks.map((link) =>
             link.dropdown ? (
               <div key={link.label} className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className={`text-xs px-4 py-2 rounded-lg transition-all tracking-wide font-medium flex items-center gap-1 ${
-                    dropdownOpen
-                      ? "bg-primary/20 text-primary border border-primary/30"
-                      : "text-primary-foreground/75 hover:bg-primary/15 hover:text-primary"
-                  }`}
+                  className={cn(
+                    linkClasses(isEmpresaActive),
+                    "flex items-center gap-1"
+                  )}
                 >
                   {link.label}
-                  <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown size={14} className={cn("transition-transform", dropdownOpen && "rotate-180")} />
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute top-full left-0 mt-1 bg-ame-dark border border-primary-foreground/15 rounded-lg shadow-xl py-1 min-w-[180px] z-50">
+                  <div className="absolute top-full right-0 mt-1 bg-ame-dark border border-primary-foreground/15 rounded-md shadow-xl py-1 min-w-[200px] z-50">
                     {link.dropdown.map((sub) => (
-                      <a
+                      <NavLink
                         key={sub.label}
-                        href={sub.href}
+                        to={sub.to}
                         onClick={() => setDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-xs text-primary-foreground/70 hover:bg-primary/15 hover:text-primary transition-colors"
+                        className="block px-4 py-2.5 text-sm text-primary-foreground/80 hover:bg-primary/15 hover:text-primary transition-colors"
                       >
                         {sub.label}
-                      </a>
+                      </NavLink>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
-              <a
+              <NavLink
                 key={link.label}
-                href={link.href}
-                className={`text-xs px-4 py-2 rounded-lg transition-all tracking-wide font-medium ${
-                  link.active
-                    ? "bg-primary/20 text-primary border border-primary/30"
-                    : "text-primary-foreground/75 hover:bg-primary/15 hover:text-primary"
-                }`}
+                to={link.to}
+                end={link.to === "/"}
+                className={({ isActive }) => linkClasses(isActive)}
               >
                 {link.label}
-              </a>
+              </NavLink>
             )
           )}
         </nav>
@@ -111,45 +123,49 @@ const Header = () => {
 
       {/* Mobile menu overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-[160px] bg-ame-dark z-50 p-6 flex flex-col gap-2 md:hidden border-t border-primary-foreground/10 overflow-y-auto">
+        <div className="fixed inset-x-0 top-[152px] bottom-0 bg-ame-dark z-40 p-6 flex flex-col gap-1 md:hidden border-t border-primary-foreground/10 overflow-y-auto">
           {navLinks.map((link) =>
             link.dropdown ? (
               <div key={link.label}>
                 <button
                   onClick={() => setMobileEmpresaOpen(!mobileEmpresaOpen)}
-                  className="w-full text-left text-sm px-4 py-2.5 rounded-lg text-primary-foreground/75 hover:bg-primary/15 hover:text-primary transition-all flex items-center justify-between"
+                  className="w-full text-left text-base px-4 py-3 rounded-md text-primary-foreground/85 hover:bg-primary/15 hover:text-primary transition-all flex items-center justify-between"
                 >
                   {link.label}
-                  <ChevronDown size={14} className={`transition-transform ${mobileEmpresaOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown size={16} className={cn("transition-transform", mobileEmpresaOpen && "rotate-180")} />
                 </button>
                 {mobileEmpresaOpen && (
                   <div className="ml-4 flex flex-col gap-1 mt-1">
                     {link.dropdown.map((sub) => (
-                      <a
+                      <NavLink
                         key={sub.label}
-                        href={sub.href}
+                        to={sub.to}
                         onClick={() => setMobileOpen(false)}
-                        className="text-xs px-4 py-2 rounded-lg text-primary-foreground/60 hover:bg-primary/15 hover:text-primary transition-colors"
+                        className="text-sm px-4 py-2 rounded-md text-primary-foreground/65 hover:bg-primary/15 hover:text-primary transition-colors"
                       >
                         {sub.label}
-                      </a>
+                      </NavLink>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
-              <a
+              <NavLink
                 key={link.label}
-                href={link.href}
+                to={link.to}
+                end={link.to === "/"}
                 onClick={() => setMobileOpen(false)}
-                className={`text-sm px-4 py-2.5 rounded-lg transition-all ${
-                  link.active
-                    ? "bg-primary/20 text-primary"
-                    : "text-primary-foreground/75 hover:bg-primary/15 hover:text-primary"
-                }`}
+                className={({ isActive }) =>
+                  cn(
+                    "text-base px-4 py-3 rounded-md transition-all font-medium",
+                    isActive
+                      ? "bg-primary/20 text-primary"
+                      : "text-primary-foreground/85 hover:bg-primary/15 hover:text-primary"
+                  )
+                }
               >
                 {link.label}
-              </a>
+              </NavLink>
             )
           )}
         </div>

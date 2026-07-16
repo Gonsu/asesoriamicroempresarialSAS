@@ -1,9 +1,10 @@
 import { Phone, Mail, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import heroTeam from "@/assets/hero-team.jpg";
 
 const contacts = [
-  { icon: Phone, text: "316 830 8779", href: "https://wa.me/3168308779" },
+  { icon: Phone, text: "316 830 8779", href: "https://wa.me/573168308779" },
   { icon: Mail, text: "asesoriamsas@gmail.com", href: "mailto:asesoriamsas@gmail.com" },
   { icon: MapPin, text: "Cll. 5 No. OA-114 2° Piso, Cúcuta", href: "https://maps.app.goo.gl/K4ZsyQxgMnRXskWL8" },
 ];
@@ -25,12 +26,12 @@ const CTA = () => {
           Nuestro equipo de asesores está disponible para atenderte y diseñar una estrategia personalizada para tu negocio.
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
-          <a href="https://wa.me/3168308779" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
+          <a href="https://wa.me/573168308779" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
             Solicitar asesoría
           </a>
-          <a href="#services" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">
+          <Link to="/servicios" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">
             Ver servicios
-          </a>
+          </Link>
         </div>
         <div className="flex justify-center gap-4 md:gap-8 mt-10 flex-wrap">
           {contacts.map((c) => (
