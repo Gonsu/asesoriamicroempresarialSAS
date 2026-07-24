@@ -20,22 +20,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    setIsAdmin(!!data);
+    try {
+      console.log("[AUTH] Verificando rol admin para", userId);
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (error) {
+        console.error("[AUTH] Error verificando rol:", error);
+        setIsAdmin(false);
+        return;
+      }
+      console.log("[AUTH] isAdmin:", !!data);
+      setIsAdmin(!!data);
+    } catch (err) {
+      console.error("[AUTH] Excepción verificando rol:", err);
+      setIsAdmin(false);
+    }
   };
 
   useEffect(() => {
+    let mounted = true;
+
+    // Listener: solo actualiza sesión sincrónicamente, difiere consultas
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
+      (event, newSession) => {
+        console.log("[AUTH] onAuthStateChange:", event);
+        if (!mounted) return;
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        if (newSession?.user) {
+          // Diferir para evitar deadlock dentro del callback
+          setTimeout(() => {
+            if (mounted) checkAdmin(newSession.user.id);
+          }, 0);
         } else {
           setIsAdmin(false);
         }
@@ -43,16 +63,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkAdmin(session.user.id);
+    // Chequeo inicial
+    (async () => {
+      try {
+        console.log("[AUTH] Iniciando getSession");
+        const { data, error } = await supabase.auth.getSession();
+        if (error) console.error("[AUTH] Error getSession:", error);
+        console.log("[AUTH] Sesión obtenida:", !!data.session);
+        if (!mounted) return;
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        if (data.session?.user) {
+          await checkAdmin(data.session.user.id);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error("[AUTH] Excepción en init:", err);
+      } finally {
+        if (mounted) {
+          console.log("[AUTH] authLoading: false");
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    });
+    })();
 
-    return () => subscription.unsubscribe();
+    // Fail-safe: nunca quedarse cargando más de 5s
+    const failSafe = setTimeout(() => {
+      if (mounted) {
+        console.warn("[AUTH] Fail-safe: forzando loading=false");
+        setLoading(false);
+      }
+    }, 5000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(failSafe);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
