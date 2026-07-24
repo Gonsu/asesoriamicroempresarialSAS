@@ -101,15 +101,14 @@ const Contacto = () => {
               </div>
             </div>
 
-            <div className="mt-6 rounded-lg overflow-hidden border border-border h-64">
-              <iframe
-                title="Ubicación AME S.A.S."
-                src="https://www.google.com/maps?q=Calle+5+Barrio+Lleras+Cucuta+Norte+de+Santander&output=embed"
-                className="w-full h-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
+            <a
+              href="https://maps.app.goo.gl/K4ZsyQxgMnRXskWL8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 flex items-center justify-center gap-2 rounded-lg border border-border bg-primary/5 hover:bg-primary/10 transition-colors px-4 py-6 text-sm font-medium text-primary"
+            >
+              <MapPin size={18} /> Ver ubicación en Google Maps
+            </a>
           </div>
 
           {/* Form */}
