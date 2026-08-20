@@ -45,7 +45,7 @@ const MeetingsManager = () => {
       .from("meetings")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error && data) setMeetings(data);
+    if (!error && data) setMeetings(await resolveStorageImages(data));
     setLoading(false);
   };
 

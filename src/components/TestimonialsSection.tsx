@@ -23,8 +23,8 @@ const TestimonialsSection = () => {
       .select("id, name, business_type, content, image_url")
       .eq("is_published", true)
       .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (data) setItems(data);
+      .then(async ({ data }) => {
+        if (data) setItems(await resolveStorageImages(data));
         setLoading(false);
       });
   }, []);

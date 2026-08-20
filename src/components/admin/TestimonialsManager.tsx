@@ -34,7 +34,7 @@ const TestimonialsManager = () => {
       .from("testimonials")
       .select("*")
       .order("created_at", { ascending: false });
-    if (data) setItems(data);
+    if (data) setItems(await resolveStorageImages(data));
     setLoading(false);
   };
 

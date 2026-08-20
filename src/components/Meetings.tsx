@@ -24,7 +24,7 @@ const Meetings = () => {
         .select("id, title, description, meeting_date, image_url, type")
         .eq("published", true)
         .order("meeting_date", { ascending: false });
-      if (data) setMeetings(data);
+      if (data) setMeetings(await resolveStorageImages(data));
       setLoading(false);
     };
     fetchMeetings();
