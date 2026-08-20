@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStorageImages } from "@/lib/storageImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,7 @@ const TestimonialsManager = () => {
       .from("testimonials")
       .select("*")
       .order("created_at", { ascending: false });
-    if (data) setItems(data);
+    if (data) setItems(await resolveStorageImages(data));
     setLoading(false);
   };
 

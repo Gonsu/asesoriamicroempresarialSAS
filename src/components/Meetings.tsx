@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStorageImages } from "@/lib/storageImage";
 import { Calendar, Users } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -24,7 +25,7 @@ const Meetings = () => {
         .select("id, title, description, meeting_date, image_url, type")
         .eq("published", true)
         .order("meeting_date", { ascending: false });
-      if (data) setMeetings(data);
+      if (data) setMeetings(await resolveStorageImages(data));
       setLoading(false);
     };
     fetchMeetings();

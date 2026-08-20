@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStorageImages } from "@/lib/storageImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,7 +46,7 @@ const MeetingsManager = () => {
       .from("meetings")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error && data) setMeetings(data);
+    if (!error && data) setMeetings(await resolveStorageImages(data));
     setLoading(false);
   };
 
