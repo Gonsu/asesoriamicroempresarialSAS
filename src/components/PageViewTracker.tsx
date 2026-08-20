@@ -10,13 +10,18 @@ const getVisitorId = () => {
   return id;
 };
 
+const sanitizePage = (path: string) => {
+  const clean = path.replace(/[^A-Za-z0-9/_-]/g, "").slice(0, 128);
+  return clean.startsWith("/") ? clean : `/${clean}`;
+};
+
 const PageViewTracker = () => {
   useEffect(() => {
     const track = async () => {
       await supabase.from("page_views").insert({
-        page: window.location.pathname,
+        page: sanitizePage(window.location.pathname),
         visitor_id: getVisitorId(),
-        user_agent: navigator.userAgent,
+        user_agent: navigator.userAgent.slice(0, 512),
       });
     };
     track();
