@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStorageImages } from "@/lib/storageImage";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Quote } from "lucide-react";
