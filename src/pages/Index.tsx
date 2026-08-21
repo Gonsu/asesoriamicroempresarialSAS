@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { Link } from "react-router-dom";
 import { ArrowRight, CircleDollarSign, LayoutGrid, Users } from "lucide-react";
 import HeroSimple from "@/components/HeroSimple";
