@@ -1,8 +1,15 @@
+import Seo from "@/components/Seo";
 import Meetings from "@/components/Meetings";
 import TestimonialsSection from "@/components/TestimonialsSection";
 
 const Reuniones = () => (
   <>
+    <Seo
+      title="Reuniones y sesiones de asesoría empresarial | AME S.A.S."
+      description="Reuniones, asesorías y actividades de AME S.A.S. con microempresarios de Cúcuta y Norte de Santander."
+      path="/reuniones"
+      noindex
+    />
     <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
       <span className="text-sm font-semibold text-primary">Actividades</span>
       <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">

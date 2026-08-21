@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { Link } from "react-router-dom";
 import { ArrowRight, CircleDollarSign, LayoutGrid, Users } from "lucide-react";
 import HeroSimple from "@/components/HeroSimple";
@@ -25,6 +26,11 @@ const featured = [
 
 const Index = () => (
   <>
+    <Seo
+      title="Asesoría empresarial para microempresas en Cúcuta | AME S.A.S."
+      description="AME S.A.S. brinda asesoría financiera, gestión administrativa y consultoría empresarial para microempresas en Cúcuta y Norte de Santander."
+      path="/"
+    />
     <HeroSimple />
     <StatsBand />
 

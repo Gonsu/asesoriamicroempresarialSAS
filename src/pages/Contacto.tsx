@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState } from "react";
 import { Phone, Mail, MapPin, Facebook, Instagram, Send } from "lucide-react";
 
@@ -15,6 +16,11 @@ const Contacto = () => {
 
   return (
     <>
+      <Seo
+        title="Contacto y ubicación en Barrio Lleras, Cúcuta | AME S.A.S."
+        description="Contáctanos: Cll. 5 No. OA-114, 2.º piso, Barrio Lleras, Cúcuta. WhatsApp +57 316 830 8779 y correo asesoriamsas@gmail.com."
+        path="/contacto"
+      />
       <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
         <span className="text-sm font-semibold text-primary">Contáctenos</span>
         <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">

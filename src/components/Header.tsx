@@ -73,7 +73,7 @@ const Header = () => {
         <NavLink to="/" className="flex items-center gap-3">
           <img src={logoAme} alt="AME S.A.S. Logo" className="h-12 w-auto" />
           <div>
-            <h1 className="text-base font-semibold text-primary-foreground leading-tight">AME S.A.S.</h1>
+            <span className="block text-base font-semibold text-primary-foreground leading-tight">AME S.A.S.</span>
             <p className="text-[11px] text-primary-foreground/60 leading-tight">Asesoría Microempresarial</p>
           </div>
         </NavLink>

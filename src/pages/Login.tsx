@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,6 +58,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Seo
+        title="Acceso administrativo | AME S.A.S."
+        description="Acceso restringido al panel administrativo de AME S.A.S."
+        path="/login"
+        noindex
+      />
       <div className="w-full max-w-md">
         <div className="bg-card rounded-xl border border-border p-8 shadow-lg">
           <div className="text-center mb-8">

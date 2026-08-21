@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { CircleDollarSign, LayoutGrid, Users, ArrowRight } from "lucide-react";
 import serviceFinancial from "@/assets/service-financial.jpg";
 import serviceAdmin from "@/assets/service-admin.jpg";
@@ -47,6 +48,11 @@ const services = [
 
 const Servicios = () => (
   <>
+    <Seo
+      title="Asesoría financiera, administrativa y consultoría | AME S.A.S."
+      description="Servicios de asesoría financiera, gestión administrativa y consultoría empresarial para microempresas en Cúcuta y Norte de Santander."
+      path="/servicios"
+    />
     <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
       <span className="text-sm font-semibold text-primary">Nuestros servicios</span>
       <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">
