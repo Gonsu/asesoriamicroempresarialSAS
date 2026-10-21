@@ -2,11 +2,12 @@ import { Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import heroTeam from "@/assets/hero-team.jpg";
+import { mailtoUrl, site } from "@/config/site";
 
 const contacts = [
-  { icon: Phone, text: "316 830 8779", href: "https://wa.me/573168308779" },
-  { icon: Mail, text: "asesoriamsas@gmail.com", href: "mailto:asesoriamsas@gmail.com" },
-  { icon: MapPin, text: "Cll. 5 No. OA-114 2° Piso, Cúcuta", href: "https://maps.app.goo.gl/K4ZsyQxgMnRXskWL8" },
+  { icon: Phone, text: site.phone.display, href: site.whatsappUrl },
+  { icon: Mail, text: site.email, href: mailtoUrl },
+  { icon: MapPin, text: `${site.address.street}, ${site.address.city}`, href: site.address.mapsUrl },
 ];
 
 const CTA = () => {
@@ -26,7 +27,7 @@ const CTA = () => {
           Nuestro equipo de asesores está disponible para atenderte y diseñar una estrategia personalizada para tu negocio.
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
-          <a href="https://wa.me/573168308779" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
+          <a href={site.whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
             Solicitar asesoría
           </a>
           <Link to="/servicios" className="bg-gradient-to-r from-accent to-[#2A8C5A] text-accent-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-0.5">

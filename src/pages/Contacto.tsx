@@ -1,6 +1,7 @@
 import Seo from "@/components/Seo";
 import { useState } from "react";
 import { Phone, Mail, MapPin, Facebook, Instagram, Send } from "lucide-react";
+import { mailtoUrl, site } from "@/config/site";
 
 const Contacto = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -11,14 +12,14 @@ const Contacto = () => {
     const body = encodeURIComponent(
       `Nombre: ${form.name}\nCorreo: ${form.email}\n\nMensaje:\n${form.message}`
     );
-    window.location.href = `mailto:asesoriamsas@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `${mailtoUrl}?subject=${subject}&body=${body}`;
   };
 
   return (
     <>
       <Seo
         title="Contacto y ubicación en Barrio Lleras, Cúcuta | AME S.A.S."
-        description="Contáctanos: Cll. 5 No. OA-114, 2.º piso, Barrio Lleras, Cúcuta. WhatsApp +57 316 830 8779 y correo asesoriamsas@gmail.com."
+        description={`Contáctanos: ${site.address.street}, ${site.address.neighborhood}, ${site.address.city}. WhatsApp +57 ${site.phone.display} y correo ${site.email}.`}
         path="/contacto"
       />
       <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
@@ -38,7 +39,7 @@ const Contacto = () => {
             <h2 className="text-2xl font-semibold text-foreground mb-6">Información de contacto</h2>
             <div className="space-y-4">
               <a
-                href="https://wa.me/573168308779"
+                href={site.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:border-primary/40 transition-colors group"
@@ -48,12 +49,12 @@ const Contacto = () => {
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-foreground">WhatsApp / Teléfono</div>
-                  <div className="text-sm text-muted-foreground">316 830 8779</div>
+                  <div className="text-sm text-muted-foreground">{site.phone.display}</div>
                 </div>
               </a>
 
               <a
-                href="mailto:asesoriamsas@gmail.com"
+                href={mailtoUrl}
                 className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:border-primary/40 transition-colors"
               >
                 <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -61,12 +62,12 @@ const Contacto = () => {
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-foreground">Correo electrónico</div>
-                  <div className="text-sm text-muted-foreground">asesoriamsas@gmail.com</div>
+                  <div className="text-sm text-muted-foreground">{site.email}</div>
                 </div>
               </a>
 
               <a
-                href="https://maps.app.goo.gl/K4ZsyQxgMnRXskWL8"
+                href={site.address.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:border-primary/40 transition-colors"
@@ -77,7 +78,7 @@ const Contacto = () => {
                 <div>
                   <div className="text-sm font-semibold text-foreground">Dirección</div>
                   <div className="text-sm text-muted-foreground">
-                    Cll. 5 No. OA-114 2° Piso, Barrio Lleras<br />Cúcuta, Norte de Santander
+                    {site.address.street}, {site.address.neighborhood}<br />{site.address.city}, {site.address.region}
                   </div>
                 </div>
               </a>
@@ -87,7 +88,7 @@ const Contacto = () => {
               <div className="text-sm font-semibold text-foreground mb-3">Síguenos</div>
               <div className="flex gap-3">
                 <a
-                  href="https://www.facebook.com/profile.php?id=100090527183922"
+                  href={site.social.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -96,7 +97,7 @@ const Contacto = () => {
                   <Facebook size={18} />
                 </a>
                 <a
-                  href="https://www.instagram.com/asesoriamsas/"
+                  href={site.social.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -108,7 +109,7 @@ const Contacto = () => {
             </div>
 
             <a
-              href="https://maps.app.goo.gl/K4ZsyQxgMnRXskWL8"
+              href={site.address.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 flex items-center justify-center gap-2 rounded-lg border border-border bg-primary/5 hover:bg-primary/10 transition-colors px-4 py-6 text-sm font-medium text-primary"

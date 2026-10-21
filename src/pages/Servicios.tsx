@@ -1,5 +1,6 @@
 import Seo from "@/components/Seo";
 import { CircleDollarSign, LayoutGrid, Users, ArrowRight } from "lucide-react";
+import { site } from "@/config/site";
 import serviceFinancial from "@/assets/service-financial.jpg";
 import serviceAdmin from "@/assets/service-admin.jpg";
 import serviceConsulting from "@/assets/service-consulting.jpg";
@@ -93,7 +94,7 @@ const Servicios = () => (
                 ))}
               </ul>
               <a
-                href="https://wa.me/573168308779"
+                href={site.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-primary/90 transition-colors"

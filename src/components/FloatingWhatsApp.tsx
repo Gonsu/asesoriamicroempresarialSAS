@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MessageCircle, X } from "lucide-react";
+import { site } from "@/config/site";
 
-const WA_LINK = "https://wa.me/573168308779";
 const TOOLTIP_KEY = "waTooltipSeen";
 
 const FloatingWhatsApp = () => {
@@ -65,7 +65,7 @@ const FloatingWhatsApp = () => {
 
       {/* Button */}
       <a
-        href={WA_LINK}
+        href={site.whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Contactar por WhatsApp"
