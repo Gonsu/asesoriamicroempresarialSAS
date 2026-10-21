@@ -80,7 +80,8 @@ const AdminDashboard = () => {
           {isFetching && !isPending && <span className="text-xs text-muted-foreground">Actualizando...</span>}
         </div>
         <p className="text-xs text-muted-foreground mt-3">
-          Cifras de {periodLabel(period)}. Las visitas de bots y vistas previas de enlaces no se cuentan.
+          Cifras de {periodLabel(period)}. Las visitas de bots y vistas previas de enlaces no se cuentan. Los
+          visitantes únicos solo incluyen a quienes aceptaron las estadísticas en el aviso de cookies.
         </p>
       </div>
 

@@ -16,9 +16,9 @@ export function statsReportRows(stats: Stats, period: Period, generatedAt = new 
     ["Reuniones", totals.reuniones],
     ["Asesorías", totals.asesorias],
     ["Visitas a la página (sin bots)", totals.visitas],
-    ["Visitantes únicos", totals.visitantesUnicos],
+    ["Visitantes únicos (solo quienes aceptaron estadísticas)", totals.visitantesUnicos],
     [],
-    ["Mes", "Visitas", "Visitantes únicos", "Reuniones/asesorías creadas"],
+    ["Mes", "Visitas", "Visitantes únicos (con consentimiento)", "Reuniones/asesorías creadas"],
     ...months.map((m) => [monthLabel(m.mes), m.visitas, m.visitantesUnicos, m.actividades]),
   ];
 }

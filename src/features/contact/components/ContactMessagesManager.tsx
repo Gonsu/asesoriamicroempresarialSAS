@@ -68,6 +68,10 @@ const ContactMessagesManager = () => {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2 break-all">{m.email}</p>
                   <p className="text-sm text-foreground whitespace-pre-wrap break-words">{m.message}</p>
+                  <p className="text-[11px] text-muted-foreground mt-2">
+                    Autorizó el tratamiento de datos el {formatDate(m.privacy_accepted_at)} (política versión{" "}
+                    {m.privacy_version}).
+                  </p>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
                   <Button asChild variant="ghost" size="icon" title="Responder por correo">

@@ -8,7 +8,7 @@ import { reportFilename, statsReportRows } from "./report";
 
 const insertPageView = vi.fn();
 vi.mock("./service", () => ({ insertPageView: (...args: unknown[]) => insertPageView(...args) }));
-const { sanitizePage, trackPageView } = await import("./tracking");
+const { clearVisitorId, sanitizePage, trackPageView } = await import("./tracking");
 
 const CHROME =
   "Mozilla/5.0 (Linux; Android 14; CUBOT X30) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36";
@@ -94,7 +94,7 @@ describe("report", () => {
   it("arma el resumen y el desglose mensual", () => {
     const rows = statsReportRows(stats, { kind: "month", year: 2026, month: 10 }, new Date(2026, 9, 21));
     expect(rows).toContainEqual(["Período", "octubre de 2026"]);
-    expect(rows).toContainEqual(["Visitantes únicos", 7]);
+    expect(rows).toContainEqual(["Visitantes únicos (solo quienes aceptaron estadísticas)", 7]);
     expect(rows.at(-1)).toEqual(["oct 2026", 20, 7, 3]);
   });
 
@@ -116,20 +116,34 @@ describe("tracking", () => {
     expect(sanitizePage("x".repeat(200))).toHaveLength(128);
   });
 
-  it("registra la visita con un visitante estable", async () => {
-    await trackPageView("/", CHROME);
-    await trackPageView("/empresa", CHROME);
+  it("con consentimiento registra la visita con un visitante estable", async () => {
+    await trackPageView("/", { withVisitorId: true, userAgent: CHROME });
+    await trackPageView("/empresa", { withVisitorId: true, userAgent: CHROME });
     expect(insertPageView).toHaveBeenCalledTimes(2);
     const [first, second] = insertPageView.mock.calls.map(([view]) => view);
     expect(second.page).toBe("/empresa");
+    expect(first.visitorId).toMatch(/^[0-9a-f-]{36}$/);
     expect(second.visitorId).toBe(first.visitorId);
   });
 
+  it("sin consentimiento registra la visita sin identificador y sin tocar localStorage", async () => {
+    await trackPageView("/", { withVisitorId: false, userAgent: CHROME });
+    expect(insertPageView).toHaveBeenCalledWith({ page: "/", visitorId: null, userAgent: CHROME });
+    expect(localStorage.length).toBe(0);
+  });
+
+  it("al retirar el consentimiento se borra el identificador", async () => {
+    await trackPageView("/", { withVisitorId: true, userAgent: CHROME });
+    expect(localStorage.getItem("ame_visitor_id")).not.toBeNull();
+    clearVisitorId();
+    expect(localStorage.getItem("ame_visitor_id")).toBeNull();
+  });
+
   it("no registra bots y no propaga errores", async () => {
-    await trackPageView("/", "WhatsApp/2.23.20.0 A");
+    await trackPageView("/", { withVisitorId: true, userAgent: "WhatsApp/2.23.20.0 A" });
     expect(insertPageView).not.toHaveBeenCalled();
 
     insertPageView.mockRejectedValueOnce(new Error("sin conexión"));
-    await expect(trackPageView("/", CHROME)).resolves.toBeUndefined();
+    await expect(trackPageView("/", { withVisitorId: false, userAgent: CHROME })).resolves.toBeUndefined();
   });
 });

@@ -26,15 +26,19 @@ describe("loginSchema", () => {
 
 describe("contactSchema", () => {
   it("valida nombre, correo y largo del mensaje", () => {
-    expect(errorsOf(contactSchema.safeParse({ name: " ", email: "x", message: "hola" }))).toEqual({
+    expect(
+      errorsOf(contactSchema.safeParse({ name: " ", email: "x", message: "hola", privacyAccepted: false })),
+    ).toEqual({
       name: "Escribe tu nombre.",
       email: "El correo no es válido.",
       message: "El mensaje debe tener al menos 10 caracteres.",
+      privacyAccepted: "Debes autorizar el tratamiento de tus datos personales.",
     });
-    expect(errorsOf(contactSchema.safeParse({ name: "Ana", email: "a@b.co", message: "x".repeat(2001) }))).toEqual({
+    const ok = { name: "Ana", email: "a@b.co", privacyAccepted: true };
+    expect(errorsOf(contactSchema.safeParse({ ...ok, message: "x".repeat(2001) }))).toEqual({
       message: "Máximo 2000 caracteres.",
     });
-    expect(contactSchema.safeParse({ name: "Ana", email: "a@b.co", message: "x".repeat(2000) }).success).toBe(true);
+    expect(contactSchema.safeParse({ ...ok, message: "x".repeat(2000) }).success).toBe(true);
   });
 });
 

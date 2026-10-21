@@ -17,6 +17,8 @@ export type Database = {
           is_read: boolean;
           message: string;
           name: string;
+          privacy_accepted_at: string;
+          privacy_version: string;
         };
         ComputedFields: never;
         Insert: {
@@ -26,6 +28,8 @@ export type Database = {
           is_read?: boolean;
           message: string;
           name: string;
+          privacy_accepted_at: string;
+          privacy_version: string;
         };
         Update: {
           created_at?: string;
@@ -34,6 +38,8 @@ export type Database = {
           is_read?: boolean;
           message?: string;
           name?: string;
+          privacy_accepted_at?: string;
+          privacy_version?: string;
         };
         Relationships: [];
       };
@@ -83,7 +89,7 @@ export type Database = {
           id: string;
           page: string;
           user_agent: string | null;
-          visitor_id: string;
+          visitor_id: string | null;
         };
         ComputedFields: never;
         Insert: {
@@ -91,14 +97,14 @@ export type Database = {
           id?: string;
           page?: string;
           user_agent?: string | null;
-          visitor_id: string;
+          visitor_id?: string | null;
         };
         Update: {
           created_at?: string;
           id?: string;
           page?: string;
           user_agent?: string | null;
-          visitor_id?: string;
+          visitor_id?: string | null;
         };
         Relationships: [];
       };
@@ -208,7 +214,7 @@ export type Database = {
           id: string;
           page: string;
           user_agent: string | null;
-          visitor_id: string;
+          visitor_id: string | null;
         }[];
         SetofOptions: {
           from: "*";

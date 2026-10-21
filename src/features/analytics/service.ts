@@ -69,7 +69,7 @@ export async function fetchStats(period: Period): Promise<Stats> {
   return { totals, months };
 }
 
-export async function insertPageView(view: { page: string; visitorId: string; userAgent: string }): Promise<void> {
+export async function insertPageView(view: { page: string; visitorId: string | null; userAgent: string }): Promise<void> {
   const { error } = await supabase.from("page_views").insert({
     page: view.page,
     visitor_id: view.visitorId,

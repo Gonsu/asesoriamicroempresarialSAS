@@ -1,4 +1,5 @@
 import Seo from "@/components/Seo";
+import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +19,7 @@ const Contacto = () => {
     formState: { errors },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { name: "", email: "", message: "" },
+    defaultValues: { name: "", email: "", message: "", privacyAccepted: false },
   });
   const send = useSendContactMessage();
   const turnstile = useRef<TurnstileHandle>(null);
@@ -188,6 +189,26 @@ const Contacto = () => {
                     className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
                   />
                   <FieldError id="message-error" message={errors.message?.message} />
+                </div>
+                <div>
+                  <div className="flex items-start gap-2">
+                    <input
+                      id="privacyAccepted"
+                      type="checkbox"
+                      aria-invalid={!!errors.privacyAccepted}
+                      aria-describedby="privacyAccepted-error"
+                      {...register("privacyAccepted")}
+                      className="mt-1 h-4 w-4 rounded border-input accent-primary"
+                    />
+                    <label htmlFor="privacyAccepted" className="text-sm text-foreground leading-snug">
+                      Autorizo a {site.name} a tratar mis datos personales para responder mi solicitud, conforme a la{" "}
+                      <Link to="/politica-de-datos" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                        Política de tratamiento de datos
+                      </Link>
+                      .
+                    </label>
+                  </div>
+                  <FieldError id="privacyAccepted-error" message={errors.privacyAccepted?.message} />
                 </div>
                 <TurnstileWidget ref={turnstile} onToken={setToken} />
                 <button

@@ -1,6 +1,7 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { PRIVACY_POLICY_VERSION } from "@/config/legal";
 import type { ContactFormValues } from "./schema";
 
 export type ContactMessage = Tables<"contact_messages">;
@@ -11,7 +12,8 @@ export type ContactMessage = Tables<"contact_messages">;
  */
 export async function sendContactMessage(values: ContactFormValues, turnstileToken: string): Promise<void> {
   const { error } = await supabase.functions.invoke("contact", {
-    body: { ...values, token: turnstileToken },
+    // privacyVersion queda guardada con el mensaje como prueba de la autorización.
+    body: { ...values, privacyVersion: PRIVACY_POLICY_VERSION, token: turnstileToken },
   });
   if (!error) return;
 
@@ -27,7 +29,7 @@ export async function sendContactMessage(values: ContactFormValues, turnstileTok
 export async function listContactMessages(): Promise<ContactMessage[]> {
   const { data, error } = await supabase
     .from("contact_messages")
-    .select("id, name, email, message, is_read, created_at")
+    .select("id, name, email, message, is_read, created_at, privacy_accepted_at, privacy_version")
     .order("created_at", { ascending: false });
   if (error) throw new Error(`No se pudieron cargar los mensajes: ${error.message}`);
   return data;

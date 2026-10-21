@@ -14,6 +14,8 @@ export const contactSchema = z.object({
     .trim()
     .min(10, "El mensaje debe tener al menos 10 caracteres.")
     .max(2000, "Máximo 2000 caracteres."),
+  // Autorización de tratamiento de datos (Ley 1581): obligatoria para enviar.
+  privacyAccepted: z.boolean().refine((v) => v, "Debes autorizar el tratamiento de tus datos personales."),
 });
 
 export type ContactFormValues = z.infer<typeof contactSchema>;
