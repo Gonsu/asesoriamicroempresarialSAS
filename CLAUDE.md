@@ -7,7 +7,8 @@ originalmente con Lovable. El objetivo es convertirlo en una aplicación limpia,
 mantenible, desplegable gratis y **sin depender de Lovable**.
 
 - **Páginas públicas:** Inicio (`/`), Empresa (`/empresa`), Servicios (`/servicios`),
-  Reuniones (`/reuniones`), Contacto (`/contacto`).
+  Reuniones (`/reuniones`), Contacto (`/contacto`), Política de datos (`/politica-de-datos`)
+  y Términos (`/terminos`).
 - **Panel admin:** `/login` y `/admin` — estadísticas, CRUD de reuniones y testimonios,
   editor de contenido.
 - **Stack:** Vite 5 + React 18 + TypeScript + Tailwind + shadcn/ui + React Router 6 +
@@ -68,7 +69,8 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 ├── supabase/
 │   ├── config.toml            # config local de la CLI (auth, Google, registro desactivado)
 │   ├── migrations/            # esquema inicial (tablas, RLS, is_admin, bucket), funciones
-│   │                          # de estadísticas y seguridad (límites, contact_messages)
+│   │                          # de estadísticas, seguridad (límites, contact_messages) y
+│   │                          # legal (visitor_id opcional, prueba de autorización, pg_cron)
 │   ├── functions/contact/     # Edge Function del formulario (Turnstile, límite, CORS);
 │   │                          # handler.ts sin Deno, probado con vitest
 │   └── seed.sql               # textos reales de site_content (upsert) + ejemplos locales
@@ -82,7 +84,9 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   │   ├── content/           # textos de site_content (defaults.ts) y ContentEditor
 │   │   ├── meetings/          # MeetingsSection (pública) y MeetingsManager (admin)
 │   │   ├── testimonials/      # TestimonialsSection (pública) y TestimonialsManager
-│   │   ├── contact/           # formulario (Turnstile), mapa al clic y ContactMessagesManager
+│   │   ├── contact/           # formulario (Turnstile + autorización), mapa al clic (con
+│   │   │                      # consentimiento) y ContactMessagesManager
+│   │   ├── consent/           # aviso de cookies: Estadísticas y Mapas (ConsentProvider)
 │   │   ├── auth/              # esquema del formulario de login
 │   │   └── schemas.test.ts    # tests de los esquemas de formularios
 │   ├── components/            # secciones públicas (Header, Footer, TopBar, HeroSimple,
@@ -91,6 +95,7 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   │   │                      # RequireAdmin (ruta protegida + inactividad)
 │   │   └── ui/                # componentes shadcn/ui en uso
 │   ├── config/site.ts         # datos de la empresa, URL del sitio y JSON-LD
+│   ├── config/legal.ts        # versión de la política, datos [COMPLETAR] y plazos de retención
 │   ├── config/securityHeaders.ts  # CSP y cabeceras (dist/_headers y vite preview)
 │   ├── contexts/              # AuthContext (proveedor), auth-context y useAuth
 │   ├── hooks/                 # use-toast, useNotify, useIdleLogout, useScrollReveal, ...
@@ -128,6 +133,11 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
   visitante y 300/h por IP (trigger que descarta en silencio); contacto 5/h por IP.
 - Nada de HTML sin escapar: ESLint prohíbe `dangerouslySetInnerHTML` e `innerHTML`; zod se
   importa de `@/lib/zod` (sin JIT, la CSP no permite eval).
+- Datos personales (Ley 1581): sin consentimiento de estadísticas la visita se guarda sin
+  `visitor_id`; Google Maps exige el consentimiento de Mapas; el formulario exige la casilla
+  y guarda `privacy_accepted_at`/`privacy_version`. Retención con pg_cron: mensajes 12 meses,
+  visitas 24, contadores 2 horas (`private.apply_retention()`). Si cambia la política, subir
+  `PRIVACY_POLICY_VERSION` (el aviso vuelve a preguntar).
 - `site_content`: textos por defecto en `features/content/defaults.ts`, iguales a `seed.sql`
   (lo comprueba un test). `extra_data.highlight` = palabra resaltada del título del hero.
 
@@ -140,6 +150,8 @@ Pendientes (estado al terminar el paso 4, 2026-10-21):
 - `cucuta-real.png` (670 KB) se sirve sin optimizar.
 - Login con Google: falta configurarlo en producción (`docs/supabase.md`, sección 5).
 - Turnstile usa la clave de prueba hasta tener la site key real.
+- Páginas legales: revisión de un abogado y datos [COMPLETAR] de `src/config/legal.ts`.
+- Producción: todo lo pendiente está en orden en `docs/lanzamiento.md`.
 
 Resueltos del diagnóstico inicial (2026-10-20): dependencia de Lovable, lockfiles duplicados,
 `.env` versionado, `site_content` sin uso, estadísticas calculadas en el navegador con un

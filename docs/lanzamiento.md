@@ -1,6 +1,6 @@
 # Lanzamiento a producción
 
-Pasos pendientes de los pasos 3 y 4 para aplicar en producción, en este orden. Se ejecutan en el paso 8. Nada de esto se ha aplicado todavía.
+Pasos pendientes de los pasos 3, 4 y 5 para aplicar en producción, en este orden. Se ejecutan en el paso 8. Nada de esto se ha aplicado todavía.
 
 - Proyecto Supabase: `xrnwnjcnqqbcqqudlzal` (región `us-west-2`).
 - Sitio: `https://asesoriamicroempresarialsas.pages.dev`.
@@ -12,6 +12,10 @@ Todo lo que lleve un secreto se ejecuta en una PowerShell aparte, nunca se pega 
 - [ ] La rama que se va a desplegar tiene `npm run typecheck`, `npm run lint`, `npm test` y `npm run build` en verde.
 - [ ] El proyecto local está enlazado: `npx supabase link --project-ref xrnwnjcnqqbcqqudlzal`.
 - [ ] El widget de Cloudflare Turnstile está creado (ver el paso 4). Tienes a mano la **site key** y la **secret key**.
+- [ ] **Revisión legal hecha** (paso 5):
+  - Un abogado revisó `/politica-de-datos`, `/terminos` y el texto de la casilla de autorización.
+  - En `src/config/legal.ts` no queda ningún `[COMPLETAR]`: `grep -rn "COMPLETAR" src` no debe devolver nada.
+  - Si el abogado cambia la política, actualiza `PRIVACY_POLICY_VERSION`.
 
 ## 1. Respaldo
 
@@ -31,6 +35,7 @@ Debe listar solo estas migraciones, en este orden:
 
 1. `20261021000000_estadisticas.sql`: funciones de estadísticas y filtro de bots (paso 3).
 2. `20261022000000_seguridad.sql`: límites de abuso, `contact_messages` y `contact_rate_limit_hit` (paso 4).
+3. `20261023000000_legal.sql`: `visitor_id` opcional, prueba de la autorización en `contact_messages` y retención con `pg_cron` (paso 5).
 
 Si aparece otra o falta alguna, detente y revisa. Si todo está bien:
 
@@ -39,6 +44,14 @@ npx supabase db push
 ```
 
 **No uses `--include-seed`:** crearía reuniones y testimonios de ejemplo.
+
+La migración legal activa la extensión `pg_cron` y programa dos tareas. Compruébalas en el **SQL Editor**:
+
+```sql
+select jobname, schedule, active from cron.job order by 1;
+```
+
+Deben aparecer `ame-rate-limits-cada-hora` (`5 * * * *`) y `ame-retencion-diaria` (`15 8 * * *`), las dos activas.
 
 ## 3. Textos del sitio (`site_content`)
 
@@ -115,7 +128,9 @@ Deben aparecer las seis. La CSP debe nombrar `https://xrnwnjcnqqbcqqudlzal.supab
 
 - [ ] Inicio y Empresa muestran los textos de `site_content`, con "microempresa" resaltada en el hero.
 - [ ] La consola del navegador no muestra violaciones de CSP en Inicio, Contacto ni el panel.
-- [ ] En Contacto, "Ver mapa" carga el mapa de Google, y antes del clic no hay peticiones a Google.
+- [ ] En una ventana privada aparece el aviso de cookies. **Rechazar** lo cierra y solo deja `ame_consent` en localStorage (DevTools → Application).
+- [ ] En Contacto, "Ver mapa" pide permiso si no aceptaste Mapas; con permiso carga el mapa. Antes no hay peticiones a Google.
+- [ ] El pie de página enlaza a `/politica-de-datos`, `/terminos` y "Preferencias de cookies", y `https://asesoriamicroempresarialsas.pages.dev/sitemap.xml` incluye las dos páginas.
 
 ### 8.3 Estadísticas (SQL Editor)
 
@@ -139,7 +154,8 @@ Debe aparecer `page_views:ip`. Si solo aparece `page_views:visitor`, la cabecera
 
 ### 8.5 Formulario de contacto
 
-- [ ] Envía un mensaje desde `/contacto`. Debe aparecer "¡Gracias! Recibimos tu mensaje".
+- [ ] Sin marcar la casilla de autorización, el formulario no se envía.
+- [ ] Envía un mensaje desde `/contacto`. Debe aparecer "¡Gracias! Recibimos tu mensaje", y en el panel el mensaje muestra la fecha y la versión de la autorización.
 - [ ] El mensaje aparece en **/admin → Mensajes**. Márcalo como leído y bórralo.
 - [ ] La llamada desde otro origen se rechaza:
 

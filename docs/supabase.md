@@ -280,3 +280,26 @@ La site key de Turnstile (pública) va en `VITE_TURNSTILE_SITE_KEY`, en `.env` y
 **Contraseñas.** `config.toml` exige 12 caracteres con mayúsculas, minúsculas y números, pero solo en local. En producción se configura en **Authentication → Providers → Email**.
 
 **Sesión del panel.** Se cierra tras 30 minutos sin actividad (`src/hooks/useIdleLogout.ts`). Es una medida del frontend: el cierre por inactividad del servidor es del plan Pro.
+
+## 11. Datos personales: consentimiento y retención (paso 5)
+
+**Visitas**
+
+- Sin consentimiento de estadísticas se guarda la visita con `visitor_id = null`, y el navegador no guarda nada.
+- Con consentimiento, la visita lleva el identificador anónimo `ame_visitor_id`.
+- Los visitantes únicos (`count(distinct visitor_id)`) solo cuentan a quienes aceptaron.
+
+**Prueba de la autorización.** `contact_messages.privacy_accepted_at` y `privacy_version` son obligatorios.
+
+- La Edge Function rechaza el envío sin la casilla marcada.
+- La hora de la aceptación la pone el servidor.
+- La versión viene de `PRIVACY_POLICY_VERSION`, en `src/config/legal.ts`.
+
+**Retención.** `pg_cron` la aplica con estas tareas:
+
+| Tarea | Horario | Qué borra |
+|---|---|---|
+| `ame-retencion-diaria` | `15 8 * * *` (03:15 en Cúcuta) | mensajes de más de 12 meses y visitas de más de 24 meses (`private.apply_retention()`) |
+| `ame-rate-limits-cada-hora` | `5 * * * *` | contadores de `private.rate_limits` de más de 2 horas |
+
+Para ejecutarla a mano: `select * from private.apply_retention();` (devuelve las filas borradas por tabla). Si cambian los plazos, actualiza la migración y `retention` en `src/config/legal.ts`, que es lo que muestra la política.
