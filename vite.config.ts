@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv, type HtmlTagDescriptor, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { buildMetaTags, buildOrganizationJsonLd, seoDefaults } from "./src/config/site";
+import { buildMetaTags, buildOrganizationJsonLd, seoDefaults } from "./src/config/site.ts";
 
 const DEFAULT_SITE_URL = "http://localhost:8080";
 
@@ -84,17 +84,19 @@ export default defineConfig(({ command, mode }) => {
     plugins: [react(), seoFiles(siteUrl)],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(import.meta.dirname, "./src"),
       },
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
     },
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           // Librerías que cambian poco en chunks propios: siguen en caché entre despliegues.
-          manualChunks: {
-            react: ["react", "react-dom", "react-router-dom"],
-            supabase: ["@supabase/supabase-js"],
+          codeSplitting: {
+            groups: [
+              { name: "react", test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/ },
+              { name: "supabase", test: /node_modules[\\/]@supabase[\\/]/ },
+            ],
           },
         },
       },
