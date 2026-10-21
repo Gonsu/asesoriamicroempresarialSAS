@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { useConsent } from "@/features/consent/useConsent";
+import { whenIdle } from "@/hooks/useIdle";
 import { periodRange, type Period } from "./period";
 import { fetchStats } from "./service";
 import { trackPageView } from "./tracking";
@@ -25,7 +26,9 @@ export function usePageViewTracking() {
   const { statistics } = useConsent();
   const statisticsRef = useRef(statistics);
   statisticsRef.current = statistics;
-  useEffect(() => {
-    void trackPageView(pathname, { withVisitorId: statisticsRef.current });
-  }, [pathname]);
+  useEffect(
+    // Con el navegador libre: registrar la visita no compite con la primera pintura.
+    () => whenIdle(() => void trackPageView(pathname, { withVisitorId: statisticsRef.current })),
+    [pathname],
+  );
 }

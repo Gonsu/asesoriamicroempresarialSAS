@@ -1,5 +1,5 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { PRIVACY_POLICY_VERSION } from "@/config/legal";
 import type { ContactFormValues } from "./schema";
@@ -11,6 +11,7 @@ export type ContactMessage = Tables<"contact_messages">;
  * IP. La tabla no admite inserciones directas desde el navegador.
  */
 export async function sendContactMessage(values: ContactFormValues, turnstileToken: string): Promise<void> {
+  const supabase = await getSupabase();
   const { error } = await supabase.functions.invoke("contact", {
     // privacyVersion queda guardada con el mensaje como prueba de la autorización.
     body: { ...values, privacyVersion: PRIVACY_POLICY_VERSION, token: turnstileToken },
@@ -27,6 +28,7 @@ export async function sendContactMessage(values: ContactFormValues, turnstileTok
 
 /** Mensajes recibidos, del más reciente al más antiguo (la RLS solo los muestra a admins). */
 export async function listContactMessages(): Promise<ContactMessage[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("contact_messages")
     .select("id, name, email, message, is_read, created_at, privacy_accepted_at, privacy_version")
@@ -36,11 +38,13 @@ export async function listContactMessages(): Promise<ContactMessage[]> {
 }
 
 export async function setContactMessageRead(input: { id: string; isRead: boolean }): Promise<void> {
+  const supabase = await getSupabase();
   const { error } = await supabase.from("contact_messages").update({ is_read: input.isRead }).eq("id", input.id);
   if (error) throw new Error(`No se pudo actualizar el mensaje: ${error.message}`);
 }
 
 export async function deleteContactMessage(id: string): Promise<void> {
+  const supabase = await getSupabase();
   const { error } = await supabase.from("contact_messages").delete().eq("id", id);
   if (error) throw new Error(`No se pudo eliminar el mensaje: ${error.message}`);
 }

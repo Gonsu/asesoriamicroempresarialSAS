@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/client";
 import { monthsInPeriod, periodRange, type Period } from "./period";
 
 export interface StatsTotals {
@@ -30,6 +30,7 @@ function rows<T>(result: { data: T[] | null; error: { message: string } | null }
 
 /** Estadísticas del período, agregadas en SQL (sin bots). Los meses sin datos van en cero. */
 export async function fetchStats(period: Period): Promise<Stats> {
+  const supabase = await getSupabase();
   const { desde, hasta } = periodRange(period);
   const args = { p_desde: desde, p_hasta: hasta };
   const [viewsRes, totalsRes, meetingsRes] = await Promise.all([
@@ -70,6 +71,7 @@ export async function fetchStats(period: Period): Promise<Stats> {
 }
 
 export async function insertPageView(view: { page: string; visitorId: string | null; userAgent: string }): Promise<void> {
+  const supabase = await getSupabase();
   const { error } = await supabase.from("page_views").insert({
     page: view.page,
     visitor_id: view.visitorId,

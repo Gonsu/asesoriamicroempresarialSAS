@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import { getSupabase } from "@/integrations/supabase/client";
+import type { AuthChangeEvent, User, Session } from "@supabase/supabase-js";
 import { AuthContext } from "@/contexts/auth-context";
 import { clearAdminActivity, markAdminActivity } from "@/hooks/useIdleLogout";
 
@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAdmin = async (userId: string) => {
     try {
+      const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -38,34 +39,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Se dispara también al suscribirse (INITIAL_SESSION), así que cubre la carga inicial
     // y el regreso del login con Google. loading sigue en true hasta conocer el rol, para
     // que /admin no redirija a /login antes de tiempo.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        if (!mounted) return;
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-
-        const userId = newSession?.user.id ?? null;
-        if (userId === checkedUserId.current) {
-          setLoading(false);
-          return;
-        }
-        checkedUserId.current = userId;
-
-        if (!userId) {
-          setIsAdmin(false);
-          setLoading(false);
-          return;
-        }
-
-        setLoading(true);
-        // Diferir para evitar deadlock dentro del callback
-        setTimeout(async () => {
+    let unsubscribe: (() => void) | null = null;
+    void getSupabase().then((supabase) => {
+      if (!mounted) return;
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event: AuthChangeEvent, newSession: Session | null) => {
           if (!mounted) return;
-          await checkAdmin(userId);
-          if (mounted && checkedUserId.current === userId) setLoading(false);
-        }, 0);
-      }
-    );
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+
+          const userId = newSession?.user.id ?? null;
+          if (userId === checkedUserId.current) {
+            setLoading(false);
+            return;
+          }
+          checkedUserId.current = userId;
+
+          if (!userId) {
+            setIsAdmin(false);
+            setLoading(false);
+            return;
+          }
+
+          setLoading(true);
+          // Diferir para evitar deadlock dentro del callback
+          setTimeout(async () => {
+            if (!mounted) return;
+            await checkAdmin(userId);
+            if (mounted && checkedUserId.current === userId) setLoading(false);
+          }, 0);
+        }
+      );
+      unsubscribe = () => subscription.unsubscribe();
+    });
 
     // Fail-safe: nunca quedarse cargando más de 5s
     const failSafe = setTimeout(() => {
@@ -78,11 +84,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       mounted = false;
       clearTimeout(failSafe);
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    const supabase = await getSupabase();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) markAdminActivity();
     return { error: error as Error | null };
@@ -93,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     // La marca se pone antes de salir hacia Google; al volver, la sesión empieza activa.
     markAdminActivity();
+    const supabase = await getSupabase();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/login` },
@@ -101,6 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    const supabase = await getSupabase();
     await supabase.auth.signOut();
     clearAdminActivity();
     setIsAdmin(false);

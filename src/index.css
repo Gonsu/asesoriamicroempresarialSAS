@@ -21,7 +21,7 @@
     --secondary-foreground: 215 25% 15%;
 
     --muted: 210 20% 96%;
-    --muted-foreground: 215 15% 47%;
+    --muted-foreground: 215 16% 40%;
 
     --accent: 150 50% 40%;
     --accent-foreground: 0 0% 100%;
@@ -87,8 +87,27 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Open Sans', 'Open Sans Fallback', sans-serif;
   }
+
+  /* Foco visible y uniforme para teclado: anillo verde con halo blanco, que se distingue
+     tanto en fondos claros como en los oscuros (cabecera, hero, pie). */
+  :where(a, button, [role="button"], [role="switch"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(0 0% 100% / 0.9);
+  }
+}
+
+/* Arial con las métricas de Open Sans: mientras llega la fuente, el texto ocupa lo mismo y
+   no se mueve al cambiar (menos CLS). Valores de las métricas publicadas de Open Sans. */
+@font-face {
+  font-family: 'Open Sans Fallback';
+  src: local('Arial');
+  ascent-override: 101.65%;
+  descent-override: 27.86%;
+  line-gap-override: 0%;
+  size-adjust: 105.44%;
 }
 
 @layer utilities {

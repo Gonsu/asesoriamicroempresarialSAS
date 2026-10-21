@@ -2,9 +2,6 @@ import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import RequireAdmin from "@/components/RequireAdmin";
 import { ConsentProvider } from "@/features/consent/ConsentProvider";
@@ -34,6 +31,9 @@ const PageFallback = () => (
   </div>
 );
 
+// Sesión y avisos solo en /login y /admin (ver AuthLayout).
+const AuthLayout = lazy(() => import("@/components/AuthLayout"));
+
 const AppRoutes = () => {
   const { pathname } = useLocation();
   return (
@@ -48,18 +48,20 @@ const AppRoutes = () => {
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/politica-de-datos" element={<PoliticaDatos />} />
             <Route path="/terminos" element={<Terminos />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/admin"
-            element={
-              <RequireAdmin>
-                <Admin />
-              </RequireAdmin>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <Admin />
+                </RequireAdmin>
+              }
+            />
+          </Route>
         </Routes>
       </Suspense>
     </ErrorBoundary>
@@ -69,17 +71,13 @@ const AppRoutes = () => {
 const App = () => (
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <AuthProvider>
-        <ConsentProvider>
-          <BrowserRouter>
-            <AppRoutes />
-            <CookieBanner />
-          </BrowserRouter>
-        </ConsentProvider>
-      </AuthProvider>
-    </TooltipProvider>
+    <ConsentProvider>
+      <BrowserRouter>
+        {/* Primero en el DOM: el aviso se alcanza con el teclado antes que el contenido. */}
+        <CookieBanner />
+        <AppRoutes />
+      </BrowserRouter>
+    </ConsentProvider>
   </QueryClientProvider>
   </HelmetProvider>
 );

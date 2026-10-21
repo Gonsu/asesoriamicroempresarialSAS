@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { MutationResult } from "@/lib/mutationResult";
 import { deleteImage, uploadImage } from "@/lib/storageImage";
@@ -15,6 +15,7 @@ const PUBLIC_COLUMNS = "id, name, business_type, content, image_path";
 const ADMIN_COLUMNS = `${PUBLIC_COLUMNS}, is_published, created_at`;
 
 export async function listPublishedTestimonials(): Promise<PublicTestimonial[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("testimonials")
     .select(PUBLIC_COLUMNS)
@@ -26,6 +27,7 @@ export async function listPublishedTestimonials(): Promise<PublicTestimonial[]> 
 
 /** Todos los testimonios, publicados o no (la RLS solo los devuelve completos a un admin). */
 export async function listTestimonials(): Promise<Testimonial[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("testimonials")
     .select(ADMIN_COLUMNS)
@@ -43,6 +45,7 @@ export async function saveTestimonial(input: {
   values: TestimonialFormValues;
   previousImage: string | null;
 }): Promise<MutationResult> {
+  const supabase = await getSupabase();
   const { id, values, previousImage } = input;
   const imagePath = values.image ? await uploadImage(values.image, "testimonials") : null;
 
@@ -65,6 +68,7 @@ export async function saveTestimonial(input: {
 }
 
 export async function setTestimonialPublished(input: { id: string; isPublished: boolean }): Promise<void> {
+  const supabase = await getSupabase();
   const { error } = await supabase
     .from("testimonials")
     .update({ is_published: input.isPublished })
@@ -73,6 +77,7 @@ export async function setTestimonialPublished(input: { id: string; isPublished: 
 }
 
 export async function deleteTestimonial(item: Pick<Testimonial, "id" | "image_path">): Promise<MutationResult> {
+  const supabase = await getSupabase();
   const { error } = await supabase.from("testimonials").delete().eq("id", item.id);
   if (error) throw new Error(`No se pudo eliminar el testimonio: ${error.message}`);
   return { warning: await deleteImage(item.image_path) };

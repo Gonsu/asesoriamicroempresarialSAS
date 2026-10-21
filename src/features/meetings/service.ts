@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { MutationResult } from "@/lib/mutationResult";
 import { deleteImage, uploadImage } from "@/lib/storageImage";
@@ -15,6 +15,7 @@ const PUBLIC_COLUMNS = "id, title, description, meeting_date, image_path, type";
 const ADMIN_COLUMNS = `${PUBLIC_COLUMNS}, published, created_at`;
 
 export async function listPublishedMeetings(): Promise<PublicMeeting[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("meetings")
     .select(PUBLIC_COLUMNS)
@@ -26,6 +27,7 @@ export async function listPublishedMeetings(): Promise<PublicMeeting[]> {
 
 /** Todas las reuniones, publicadas o no (la RLS solo las devuelve completas a un admin). */
 export async function listMeetings(): Promise<Meeting[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("meetings")
     .select(ADMIN_COLUMNS)
@@ -43,6 +45,7 @@ export async function saveMeeting(input: {
   values: MeetingFormValues;
   previousImage: string | null;
 }): Promise<MutationResult> {
+  const supabase = await getSupabase();
   const { id, values, previousImage } = input;
   const imagePath = values.image ? await uploadImage(values.image, "meetings") : null;
 
@@ -66,6 +69,7 @@ export async function saveMeeting(input: {
 }
 
 export async function deleteMeeting(meeting: Pick<Meeting, "id" | "image_path">): Promise<MutationResult> {
+  const supabase = await getSupabase();
   const { error } = await supabase.from("meetings").delete().eq("id", meeting.id);
   if (error) throw new Error(`No se pudo eliminar la reunión: ${error.message}`);
   return { warning: await deleteImage(meeting.image_path) };

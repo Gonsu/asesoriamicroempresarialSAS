@@ -22,12 +22,19 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <a
+        href="#contenido"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg"
+      >
+        Saltar al contenido
+      </a>
       <PageViewTracker />
       <TopBar />
       <Header />
-      <main className="flex-1">
+      <main id="contenido" tabIndex={-1} className="flex-1 focus:outline-none">
         {/* Las páginas se cargan en diferido; mientras, se mantienen el encabezado y el pie. */}
-        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+        {/* El hueco ocupa toda la pantalla: el pie no aparece y luego salta (CLS). */}
+        <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
           <Outlet />
         </Suspense>
       </main>

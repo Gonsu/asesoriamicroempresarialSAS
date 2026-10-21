@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase } from "@/integrations/supabase/client";
 import type { Json, Tables } from "@/integrations/supabase/types";
 import { DEFAULT_CONTENT, SECTION_KEYS, type SectionContent, type SectionKey } from "./defaults";
 
@@ -42,6 +42,7 @@ export function mergeContent(rows: SiteContentRow[]): SiteContent {
 }
 
 export async function fetchSiteContent(): Promise<SiteContent> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("site_content")
     .select("section_key, title, subtitle, description, extra_data");
@@ -51,6 +52,7 @@ export async function fetchSiteContent(): Promise<SiteContent> {
 
 /** Crea o actualiza una sección. extra_data solo se escribe en el hero (palabra resaltada). */
 export async function saveSection(key: SectionKey, values: SectionContent): Promise<void> {
+  const supabase = await getSupabase();
   const { error } = await supabase.from("site_content").upsert(
     {
       section_key: key,

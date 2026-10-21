@@ -1,11 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIdleReady } from "@/hooks/useIdle";
 import { DEFAULT_CONTENT, type SectionContent, type SectionKey } from "./defaults";
 import { fetchSiteContent, saveSection } from "./service";
 
 const contentKey = ["site_content"] as const;
 
+/**
+ * Textos de site_content. La consulta espera a que el navegador quede libre: la primera pintura
+ * usa los textos por defecto (iguales a los de la base) y no espera a cargar supabase-js.
+ */
 export function useSiteContent() {
-  return useQuery({ queryKey: contentKey, queryFn: fetchSiteContent, staleTime: 5 * 60 * 1000 });
+  const idle = useIdleReady();
+  return useQuery({ queryKey: contentKey, queryFn: fetchSiteContent, staleTime: 5 * 60 * 1000, enabled: idle });
 }
 
 /** Textos de una sección. Mientras carga, o si la consulta falla, devuelve los valores por defecto. */

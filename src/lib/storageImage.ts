@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase, SUPABASE_URL } from "@/integrations/supabase/client";
 
 /**
  * Imágenes del sitio en el bucket público `site-images`. En la base de datos se guarda solo
@@ -21,7 +21,9 @@ export type ImageFolder = "meetings" | "testimonials" | "content";
 
 export function imageUrl(path: string | null | undefined): string | undefined {
   if (!path) return undefined;
-  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  // Misma URL que getPublicUrl(), sin cargar supabase-js en las páginas públicas.
+  const encoded = path.split("/").map(encodeURIComponent).join("/");
+  return `${SUPABASE_URL.replace(/\/+$/, "")}/storage/v1/object/public/${BUCKET}/${encoded}`;
 }
 
 /** Devuelve un mensaje de error si el archivo no cumple los límites del bucket. */
@@ -37,6 +39,7 @@ export function validateImage(file: File): string | null {
 
 /** Sube la imagen y devuelve su ruta en el bucket. Lanza un Error con mensaje para el usuario. */
 export async function uploadImage(file: File, folder: ImageFolder): Promise<string> {
+  const supabase = await getSupabase();
   const invalid = validateImage(file);
   if (invalid) throw new Error(invalid);
 
@@ -54,6 +57,7 @@ export async function uploadImage(file: File, folder: ImageFolder): Promise<stri
  * devuelve un aviso para mostrar al usuario, o null si se borró (o no había imagen).
  */
 export async function deleteImage(path: string | null | undefined): Promise<string | null> {
+  const supabase = await getSupabase();
   if (!path) return null;
   const { error } = await supabase.storage.from(BUCKET).remove([path]);
   return error ? `No se pudo borrar la imagen del almacenamiento (${error.message}); quedó como archivo sin usar.` : null;
