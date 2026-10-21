@@ -4,7 +4,7 @@ import { ArrowRight, CircleDollarSign, LayoutGrid, Users } from "lucide-react";
 import HeroSimple from "@/components/HeroSimple";
 import StatsBand from "@/components/StatsBand";
 import CTA from "@/components/CTA";
-import aboutCucuta from "@/assets/cucuta-real.png";
+import { cucutaImage } from "@/assets/images";
 import { useSection } from "@/features/content/hooks";
 import { paragraphs } from "@/features/content/text";
 
@@ -33,11 +33,7 @@ const Index = () => {
 
   return (
     <>
-      <Seo
-        title="Asesoría empresarial para microempresas en Cúcuta | AME S.A.S."
-        description="AME S.A.S. brinda asesoría financiera, gestión administrativa y consultoría empresarial para microempresas en Cúcuta y Norte de Santander."
-        path="/"
-      />
+      <Seo path="/" />
       <HeroSimple />
       <StatsBand />
 
@@ -45,7 +41,17 @@ const Index = () => {
       <section className="section-padding px-6 md:px-8 bg-card">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div className="rounded-xl overflow-hidden h-72 md:h-80 shadow-lg">
-            <img src={aboutCucuta} alt="Cúcuta, Norte de Santander" className="w-full h-full object-cover" loading="lazy" />
+            <img
+              src={cucutaImage.src}
+              srcSet={cucutaImage.srcSet}
+              sizes="(min-width: 768px) 480px, 100vw"
+              width={cucutaImage.width}
+              height={cucutaImage.height}
+              alt="Vista de Cúcuta, Norte de Santander"
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <div>
             {about.subtitle && <span className="text-sm font-semibold text-primary">{about.subtitle}</span>}

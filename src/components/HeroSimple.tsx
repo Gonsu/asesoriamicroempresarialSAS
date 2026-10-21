@@ -1,32 +1,54 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import heroConsulting from "@/assets/hero-consulting.jpg";
-import heroEntrepreneur from "@/assets/hero-entrepreneur.jpg";
-import heroTeam from "@/assets/hero-team.jpg";
+import { Pause, Play } from "lucide-react";
+import { heroImages } from "@/assets/images";
 import { useSection } from "@/features/content/hooks";
 import { splitHighlight } from "@/features/content/text";
 
-const slides = [heroConsulting, heroEntrepreneur, heroTeam];
+const SLIDE_MS = 5500;
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 const HeroSimple = () => {
   const [current, setCurrent] = useState(0);
+  // Sin avance automático si el sistema pide reducir el movimiento (WCAG 2.2.2).
+  const [playing, setPlaying] = useState(() => !prefersReducedMotion());
   const content = useSection("hero");
   const title = splitHighlight(content.title, content.highlight);
 
   useEffect(() => {
-    const t = setInterval(() => setCurrent((c) => (c + 1) % slides.length), 5500);
+    if (!playing) return;
+    const t = setInterval(() => setCurrent((c) => (c + 1) % heroImages.length), SLIDE_MS);
     return () => clearInterval(t);
-  }, []);
+  }, [playing]);
 
   return (
-    <section className="relative overflow-hidden h-[420px] md:h-[520px]">
-      {slides.map((img, i) => (
+    <section
+      className="relative overflow-hidden h-[420px] md:h-[520px]"
+      aria-roledescription="carrusel"
+      aria-label="Imágenes de portada"
+    >
+      {heroImages.map((img, i) => (
         <div
-          key={i}
+          key={img.src}
           className="absolute inset-0 transition-opacity duration-700"
           style={{ opacity: i === current ? 1 : 0 }}
+          aria-hidden={i !== current}
         >
-          <img src={img} alt="" className="w-full h-full object-cover" />
+          {/* La primera foto es el LCP: se pide con prioridad alta; las demás, después. */}
+          <img
+            src={img.src}
+            srcSet={img.srcSet}
+            sizes="100vw"
+            width={img.width}
+            height={img.height}
+            alt=""
+            className="w-full h-full object-cover"
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchPriority={i === 0 ? "high" : "low"}
+            decoding={i === 0 ? "sync" : "async"}
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-ame-dark/90 via-ame-dark/75 to-ame-dark/40" />
         </div>
       ))}
@@ -34,7 +56,7 @@ const HeroSimple = () => {
       <div className="relative z-10 h-full flex items-center px-6 md:px-16 max-w-5xl">
         <div>
           {content.subtitle && (
-            <span className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-4 border border-primary/30">
+            <span className="inline-block bg-primary/20 text-[#5DCAA5] text-xs font-medium px-3 py-1 rounded-full mb-4 border border-primary/30">
               {content.subtitle}
             </span>
           )}
@@ -51,9 +73,7 @@ const HeroSimple = () => {
               content.title
             )}
           </h1>
-          <p className="text-primary-foreground/80 text-base leading-relaxed mb-8 max-w-lg">
-            {content.description}
-          </p>
+          <p className="text-primary-foreground/80 text-base leading-relaxed mb-8 max-w-lg">{content.description}</p>
           <div className="flex gap-3 flex-wrap">
             <Link
               to="/servicios"
@@ -71,14 +91,29 @@ const HeroSimple = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-        {slides.map((_, i) => (
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setPlaying((p) => !p)}
+          aria-label={playing ? "Pausar el carrusel" : "Reanudar el carrusel"}
+          className="h-8 w-8 flex items-center justify-center rounded-full text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10 transition-colors"
+        >
+          {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+        </button>
+        {heroImages.map((img, i) => (
+          // Área táctil de 24 px (WCAG 2.5.8) con el punto visual pequeño adentro.
           <button
-            key={i}
+            key={img.src}
+            type="button"
             onClick={() => setCurrent(i)}
-            aria-label={`Ir a diapositiva ${i + 1}`}
-            className={`h-1.5 rounded-full transition-all ${i === current ? "w-8 bg-primary" : "w-2 bg-primary-foreground/40"}`}
-          />
+            aria-label={`Ir a la imagen ${i + 1} de ${heroImages.length}`}
+            aria-current={i === current}
+            className="h-6 min-w-6 px-1 flex items-center justify-center rounded-full"
+          >
+            <span
+              className={`block h-1.5 rounded-full transition-all ${i === current ? "w-8 bg-[#5DCAA5]" : "w-2 bg-primary-foreground/60"}`}
+            />
+          </button>
         ))}
       </div>
     </section>

@@ -1,16 +1,14 @@
 import Seo from "@/components/Seo";
 import { CircleDollarSign, LayoutGrid, Users, ArrowRight } from "lucide-react";
 import { site } from "@/config/site";
-import serviceFinancial from "@/assets/service-financial.jpg";
-import serviceAdmin from "@/assets/service-admin.jpg";
-import serviceConsulting from "@/assets/service-consulting.jpg";
+import { serviceImages } from "@/assets/images";
 
 const services = [
   {
     icon: CircleDollarSign,
     title: "Asesoría financiera",
     tag: "Finanzas",
-    image: serviceFinancial,
+    image: serviceImages.financial,
     desc: "Gestión integral de créditos, planeación presupuestal y estrategias de inversión adaptadas al tamaño y sector de tu empresa.",
     points: [
       "Estructuración y gestión de microcréditos",
@@ -23,7 +21,7 @@ const services = [
     icon: LayoutGrid,
     title: "Gestión administrativa",
     tag: "Administración",
-    image: serviceAdmin,
+    image: serviceImages.admin,
     desc: "Organización de procesos, gestión documental, cumplimiento normativo y fortalecimiento de la estructura organizacional.",
     points: [
       "Organización de procesos internos",
@@ -36,7 +34,7 @@ const services = [
     icon: Users,
     title: "Consultoría empresarial",
     tag: "Consultoría",
-    image: serviceConsulting,
+    image: serviceImages.consulting,
     desc: "Diagnóstico organizacional, planes de mejora continua y acompañamiento en procesos de formalización empresarial.",
     points: [
       "Diagnóstico organizacional",
@@ -49,13 +47,9 @@ const services = [
 
 const Servicios = () => (
   <>
-    <Seo
-      title="Asesoría financiera, administrativa y consultoría | AME S.A.S."
-      description="Servicios de asesoría financiera, gestión administrativa y consultoría empresarial para microempresas en Cúcuta y Norte de Santander."
-      path="/servicios"
-    />
+    <Seo path="/servicios" />
     <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
-      <span className="text-sm font-semibold text-primary">Nuestros servicios</span>
+      <span className="text-sm font-semibold text-[#5DCAA5]">Nuestros servicios</span>
       <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">
         Soluciones para tu empresa
       </h1>
@@ -72,7 +66,17 @@ const Servicios = () => (
             className={`grid md:grid-cols-2 gap-10 items-center ${idx % 2 === 1 ? "md:[direction:rtl]" : ""}`}
           >
             <div className="rounded-xl overflow-hidden h-64 md:h-80 shadow-lg [direction:ltr]">
-              <img src={s.image} alt={s.title} className="w-full h-full object-cover" loading="lazy" />
+              <img
+                src={s.image.src}
+                srcSet={s.image.srcSet}
+                sizes="(min-width: 768px) 480px, 100vw"
+                width={s.image.width}
+                height={s.image.height}
+                alt=""
+                className="w-full h-full object-cover"
+                loading={idx === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
             </div>
             <div className="[direction:ltr]">
               <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3">

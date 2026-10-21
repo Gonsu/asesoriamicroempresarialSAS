@@ -1,7 +1,7 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import heroTeam from "@/assets/hero-team.jpg";
+import { heroImages } from "@/assets/images";
 import { mailtoUrl, site } from "@/config/site";
 import { useSection } from "@/features/content/hooks";
 
@@ -16,7 +16,17 @@ const CTA = () => {
   const content = useSection("cta");
   return (
     <section id="contact" ref={ref} className="relative overflow-hidden py-20 px-8 text-center">
-      <img src={heroTeam} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+      <img
+        src={heroImages[2].src}
+        srcSet={heroImages[2].srcSet}
+        sizes="100vw"
+        width={heroImages[2].width}
+        height={heroImages[2].height}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
+      />
       <div className="absolute inset-0 bg-gradient-to-br from-[hsl(214,30%,15%)]/90 via-[hsl(210,30%,25%)]/85 to-[hsl(150,60%,26%)]/30" />
       <div className="relative z-10">
         {content.subtitle && (

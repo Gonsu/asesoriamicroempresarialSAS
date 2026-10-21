@@ -1,12 +1,12 @@
 import { Home } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import aboutCucuta from "@/assets/cucuta-real.png";
+import { cucutaImage } from "@/assets/images";
 import { useSection } from "@/features/content/hooks";
 import { paragraphs } from "@/features/content/text";
 
 const badges = [
   { label: "Economía privada", cls: "bg-primary/15 text-[#1B6B3A] border border-primary/20" },
-  { label: "Sector financiero", cls: "bg-accent/15 text-[#2A8C5A] border border-accent/20" },
+  { label: "Sector financiero", cls: "bg-accent/15 text-[#1B6B3A] border border-accent/20" },
   { label: "Consultoría", cls: "bg-ame-blue/15 text-[#185FA5] border border-ame-blue/20" },
   { label: "Registro legal", cls: "bg-primary/15 text-[#1B6B3A] border border-primary/20" },
 ];
@@ -20,12 +20,15 @@ const About = () => {
       <div className="grid md:grid-cols-2 gap-10 items-center">
         <div className="relative rounded-2xl overflow-hidden h-80 shadow-xl group">
           <img
-            src={aboutCucuta}
-            alt="Cúcuta, Norte de Santander"
+            src={cucutaImage.src}
+            srcSet={cucutaImage.srcSet}
+            sizes="(min-width: 768px) 50vw, 100vw"
+            alt="Vista de Cúcuta, Norte de Santander"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
-            width={800}
-            height={600}
+            decoding="async"
+            width={cucutaImage.width}
+            height={cucutaImage.height}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[hsl(214,30%,15%)]/80 via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-6">

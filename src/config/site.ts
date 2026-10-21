@@ -40,7 +40,7 @@ export const seoDefaults = {
   description:
     "Servicios financieros y administrativos para microempresas en Cúcuta, Colombia. Asesoría, gestión y consultoría empresarial.",
   locale: "es_CO",
-  image: { path: "/og-image.png", width: 1344, height: 768, alt: `${site.shortName} — Asesoría Microempresarial` },
+  image: { path: "/og-image.jpg", width: 1200, height: 630, alt: `${site.shortName} — Asesoría Microempresarial` },
 } as const;
 
 export type MetaTag = { name: string; content: string } | { property: string; content: string };
