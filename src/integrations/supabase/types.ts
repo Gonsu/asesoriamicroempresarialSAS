@@ -172,7 +172,30 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      human_page_views: {
+        Args: { p_desde: string; p_hasta: string };
+        Returns: Database["public"]["Tables"]["page_views"]["Row"][];
+      };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_bot_user_agent: { Args: { p_user_agent: string }; Returns: boolean };
+      meeting_stats: {
+        Args: { p_desde: string; p_hasta: string };
+        Returns: {
+          asesorias: number;
+          mes: string;
+          publicadas: number;
+          reuniones: number;
+          total: number;
+        }[];
+      };
+      page_view_stats: {
+        Args: { p_desde: string; p_hasta: string };
+        Returns: { mes: string; visitantes_unicos: number; visitas: number }[];
+      };
+      page_view_totals: {
+        Args: { p_desde: string; p_hasta: string };
+        Returns: { visitantes_unicos: number; visitas: number }[];
+      };
     };
     Enums: {
       app_role: "admin" | "user";

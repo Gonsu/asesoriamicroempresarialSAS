@@ -4,7 +4,7 @@ import TopBar from "@/components/TopBar";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import PageViewTracker from "@/components/PageViewTracker";
+import PageViewTracker from "@/features/analytics/components/PageViewTracker";
 
 const Layout = () => {
   const { pathname, hash } = useLocation();

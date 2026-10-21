@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote } from "lucide-react";
-import AdminDashboard from "@/components/admin/AdminDashboard";
+import AdminDashboard from "@/features/analytics/components/AdminDashboard";
 import MeetingsManager from "@/components/admin/MeetingsManager";
-import ContentEditor from "@/components/admin/ContentEditor";
+import ContentEditor from "@/features/content/components/ContentEditor";
 import TestimonialsManager from "@/components/admin/TestimonialsManager";
 
 const tabs = [
