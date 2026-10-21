@@ -21,7 +21,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAdmin = async (userId: string) => {
     try {
-      console.log("[AUTH] Verificando rol admin para", userId);
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -33,7 +32,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(false);
         return;
       }
-      console.log("[AUTH] isAdmin:", !!data);
       setIsAdmin(!!data);
     } catch (err) {
       console.error("[AUTH] Excepción verificando rol:", err);
@@ -46,8 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Listener: solo actualiza sesión sincrónicamente, difiere consultas
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log("[AUTH] onAuthStateChange:", event);
+      (_event, newSession) => {
         if (!mounted) return;
         setSession(newSession);
         setUser(newSession?.user ?? null);
@@ -66,10 +63,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Chequeo inicial
     (async () => {
       try {
-        console.log("[AUTH] Iniciando getSession");
         const { data, error } = await supabase.auth.getSession();
         if (error) console.error("[AUTH] Error getSession:", error);
-        console.log("[AUTH] Sesión obtenida:", !!data.session);
         if (!mounted) return;
         setSession(data.session);
         setUser(data.session?.user ?? null);
@@ -82,7 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error("[AUTH] Excepción en init:", err);
       } finally {
         if (mounted) {
-          console.log("[AUTH] authLoading: false");
           setLoading(false);
         }
       }
