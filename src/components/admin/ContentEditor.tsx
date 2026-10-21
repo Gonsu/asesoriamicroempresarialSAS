@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,15 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Save, RotateCcw } from "lucide-react";
 
-interface SectionContent {
-  id: string;
-  section_key: string;
-  title: string | null;
-  subtitle: string | null;
-  description: string | null;
-  image_path: string | null;
-  extra_data: any;
-}
+type SectionContent = Tables<"site_content">;
 
 const SECTION_LABELS: Record<string, string> = {
   hero: "🏠 Hero (Inicio)",
@@ -42,7 +35,7 @@ const ContentEditor = () => {
       .from("site_content")
       .select("*")
       .order("created_at");
-    if (data) setSections(data as SectionContent[]);
+    if (data) setSections(data);
     setLoading(false);
   };
 
@@ -87,7 +80,7 @@ const ContentEditor = () => {
 
   const getValue = (section: SectionContent, field: keyof SectionContent) => {
     const edited = editedSections[section.section_key];
-    if (edited && field in edited) return (edited as any)[field] || "";
+    if (edited && field in edited) return (edited[field] as string | null) || "";
     return (section[field] as string) || "";
   };
 

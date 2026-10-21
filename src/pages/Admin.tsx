@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote } from "lucide-react";
 import AdminDashboard from "@/components/admin/AdminDashboard";

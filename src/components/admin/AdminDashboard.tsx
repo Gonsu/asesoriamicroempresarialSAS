@@ -36,25 +36,25 @@ const AdminDashboard = () => {
     const viewsByMonth: Record<string, { views: number; visitors: Set<string> }> = {};
     const meetingsByMonth: Record<string, number> = {};
 
-    views.forEach((v: any) => {
+    views.forEach((v) => {
       const month = new Date(v.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "short" });
       if (!viewsByMonth[month]) viewsByMonth[month] = { views: 0, visitors: new Set() };
       viewsByMonth[month].views++;
       viewsByMonth[month].visitors.add(v.visitor_id);
     });
 
-    meetings.forEach((m: any) => {
+    meetings.forEach((m) => {
       const month = new Date(m.created_at).toLocaleDateString("es-CO", { year: "numeric", month: "short" });
       meetingsByMonth[month] = (meetingsByMonth[month] || 0) + 1;
     });
 
-    const uniqueVisitors = new Set(views.map((v: any) => v.visitor_id)).size;
+    const uniqueVisitors = new Set(views.map((v) => v.visitor_id)).size;
 
     setStats({
       totalMeetings: meetings.length,
-      publishedMeetings: meetings.filter((m: any) => m.published).length,
-      reuniones: meetings.filter((m: any) => m.type === "reunion").length,
-      asesorias: meetings.filter((m: any) => m.type === "asesoria").length,
+      publishedMeetings: meetings.filter((m) => m.published).length,
+      reuniones: meetings.filter((m) => m.type === "reunion").length,
+      asesorias: meetings.filter((m) => m.type === "asesoria").length,
       totalViews: views.length,
       uniqueVisitors,
       viewsByMonth: Object.entries(viewsByMonth).map(([month, data]) => ({

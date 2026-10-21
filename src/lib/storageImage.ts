@@ -19,8 +19,8 @@ const EXTENSIONS: Record<(typeof IMAGE_TYPES)[number], string> = {
 
 export type ImageFolder = "meetings" | "testimonials" | "content";
 
-export function imageUrl(path: string | null | undefined): string | null {
-  if (!path) return null;
+export function imageUrl(path: string | null | undefined): string | undefined {
+  if (!path) return undefined;
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
