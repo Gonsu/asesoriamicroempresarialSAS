@@ -108,7 +108,13 @@ En **Workers & Pages → el proyecto → Settings → Variables and Secrets**, p
 | `VITE_SITE_URL` | `https://asesoriamicroempresarialsas.pages.dev` |
 | `VITE_TURNSTILE_SITE_KEY` | Site key del widget. Sin ella se usa la clave de prueba y el formulario falla. |
 
-Configuración de build: comando `npm run build`, directorio de salida `dist`. El build genera `dist/_headers` con las cabeceras de seguridad.
+Configuración de build: comando `npm run build`, directorio de salida `dist`. El build genera:
+
+- `dist/_headers` con las cabeceras de seguridad;
+- un HTML por ruta (`empresa.html`, `contacto.html`…) con su título, OG y datos estructurados;
+- `404.html`.
+
+Pages sirve `empresa.html` en `/empresa` y `404.html` con estado 404 para las rutas que no existen.
 
 ## 7. Desplegar el frontend
 
@@ -125,6 +131,10 @@ curl -sI https://asesoriamicroempresarialsas.pages.dev | grep -iE "content-secur
 Deben aparecer las seis. La CSP debe nombrar `https://xrnwnjcnqqbcqqudlzal.supabase.co`.
 
 ### 8.2 Sitio público
+
+- [ ] `curl -s https://asesoriamicroempresarialsas.pages.dev/empresa | grep "<title>"` muestra el título de Empresa (no el de Inicio).
+- [ ] `curl -s -o /dev/null -w "%{http_code}" https://asesoriamicroempresarialsas.pages.dev/no-existe` responde `404`.
+- [ ] Vista previa al compartir: pega una URL en el [depurador de Facebook](https://developers.facebook.com/tools/debug/) y comprueba título, descripción y `og-image.jpg`.
 
 - [ ] Inicio y Empresa muestran los textos de `site_content`, con "microempresa" resaltada en el hero.
 - [ ] La consola del navegador no muestra violaciones de CSP en Inicio, Contacto ni el panel.

@@ -14,8 +14,8 @@ mantenible, desplegable gratis y **sin depender de Lovable**.
 - **Stack:** Vite 5 + React 18 + TypeScript + Tailwind + shadcn/ui + React Router 6 +
   Supabase (Postgres, Auth, Storage) + TanStack Query + zod + react-hook-form + react-helmet-async.
 - **Hosting objetivo:** Cloudflare Pages (plan gratuito) en un subdominio `*.pages.dev`
-  (aún no hay dominio propio). SPA: Cloudflare Pages sirve `index.html` como fallback si
-  no existe `404.html` en `dist/`.
+  (aún no hay dominio propio). El build genera un HTML por ruta (`empresa.html`… que Pages
+  sirve en `/empresa`) con su título, OG y JSON-LD, y `404.html` (estado 404) para lo demás.
 - **Backend:** Supabase en plan gratuito, en la cuenta propia del usuario (proyecto
   `xrnwnjcnqqbcqqudlzal`). Migraciones en `supabase/migrations/`, seed en `supabase/seed.sql`.
   Guía completa (local, producción, admin, Google, migración desde Lovable): `docs/supabase.md`.
@@ -44,7 +44,8 @@ npm run lint         # ESLint (falla también con avisos: --max-warnings 0)
 npm test             # Vitest (una pasada)
 npm run test:watch   # Vitest en modo watch
 npm run typecheck    # tipos de la app, los tests y la config (vite build no los revisa)
-npm run preview      # sirve dist/ con las cabeceras de seguridad (prueba la CSP)
+npm run preview      # sirve dist/ como Pages: cabeceras, HTML por ruta y 404 (prueba la CSP)
+npm run images       # regenera src/assets/*.webp y public/og-image.jpg desde assets-originales/
 npx supabase functions serve contact --env-file supabase/functions/.env   # Edge Function local
 npx supabase start   # Supabase local (requiere Docker Desktop); migraciones + seed
 npx supabase db reset                   # recrea la base local
@@ -64,8 +65,11 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 ├── public/                    # favicon y og-image.png (se copian tal cual a dist/);
 │                              # robots.txt y sitemap.xml los genera vite.config.ts
 ├── docs/supabase.md           # backend: local, producción, admin, Google, migración
+├── docs/lanzamiento.md        # pasos pendientes de producción, en orden
+├── assets-originales/         # fotos y logo originales (no entran al build)
 ├── scripts/
-│   └── migrar-desde-lovable.mjs   # exporta/importa datos e imágenes de Lovable Cloud
+│   ├── migrar-desde-lovable.mjs   # exporta/importa datos e imágenes de Lovable Cloud
+│   └── optimizar-imagenes.mjs     # WebP por anchos y og-image.jpg (sharp)
 ├── supabase/
 │   ├── config.toml            # config local de la CLI (auth, Google, registro desactivado)
 │   ├── migrations/            # esquema inicial (tablas, RLS, is_admin, bucket), funciones
@@ -95,6 +99,7 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   │   │                      # RequireAdmin (ruta protegida + inactividad)
 │   │   └── ui/                # componentes shadcn/ui en uso
 │   ├── config/site.ts         # datos de la empresa, URL del sitio y JSON-LD
+│   ├── config/routes.ts       # título, descripción, sitemap y migas de pan de cada ruta
 │   ├── config/legal.ts        # versión de la política, datos [COMPLETAR] y plazos de retención
 │   ├── config/securityHeaders.ts  # CSP y cabeceras (dist/_headers y vite preview)
 │   ├── contexts/              # AuthContext (proveedor), auth-context y useAuth
@@ -103,7 +108,7 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   │   └── supabase/          # client.ts y types.ts (tipos generados de la BD)
 │   ├── lib/                   # utils.ts (cn), storageImage.ts (subir/borrar/URL de imágenes),
 │   │                          # imageField.ts (validación zod de imágenes), zod.ts (z sin JIT)
-│   ├── assets/                # imágenes importadas por Vite
+│   ├── assets/                # WebP generados + images.ts (src, srcSet, width, height)
 │   └── test/                  # setup de Vitest
 ├── vite.config.ts / vitest.config.ts / tailwind.config.ts / eslint.config.js
 └── tsconfig*.json             # TypeScript en modo estricto
@@ -122,8 +127,13 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
   (`image_path`), nunca la URL; la URL se arma con `imageUrl()` de `storageImage.ts`.
 - Auth: registro público desactivado; login con contraseña o Google (solo cuentas existentes).
 - La autorización real está en RLS; las comprobaciones de `isAdmin` en el frontend son solo UX.
-- Solo `AuthContext`, `lib/storageImage.ts` y los `service.ts` de `features/` importan `supabase`;
-  los componentes usan los hooks.
+- Solo `AuthContext`, `lib/storageImage.ts` y los `service.ts` de `features/` usan Supabase, siempre
+  con `await getSupabase()` (supabase-js se carga en diferido, fuera del JS inicial). Los
+  componentes usan los hooks. La sesión (`AuthLayout`) solo envuelve `/login` y `/admin`.
+- Rendimiento: la consulta de textos y el registro de visitas esperan a `whenIdle`; las
+  imágenes llevan `width`/`height` y `srcSet`; Lighthouse ≥ 90 en las 4 categorías (paso 6).
+- Accesibilidad: foco visible global, "Saltar al contenido", menús con `aria-expanded` y
+  Escape, pestañas WAI-ARIA en Empresa, carrusel con pausa, aviso de cookies primero en el DOM.
 - Estadísticas: funciones SQL `security invoker` (`page_view_stats`, `page_view_totals`,
   `meeting_stats`) por período en `America/Bogota`; excluyen bots con `is_bot_user_agent`,
   cuya regex debe coincidir con `features/analytics/bots.ts` (lo comprueba un test).
