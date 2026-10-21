@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PRIVACY_POLICY_VERSION } from "@/config/legal";
@@ -49,15 +49,16 @@ beforeEach(() => {
 describe("aviso de cookies", () => {
   it("aparece sin elección y Rechazar guarda todo en false", () => {
     renderWith(null);
-    expect(screen.getByRole("dialog", { name: "Aviso de cookies y almacenamiento local" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Tu privacidad" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Rechazar" }));
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByRole("region", { name: "Tu privacidad" })).toBeNull();
     expect(readConsent()).toMatchObject({ statistics: false, maps: false, version: PRIVACY_POLICY_VERSION });
   });
 
-  it("Configurar permite elegir por categoría", () => {
+  it("Configurar lleva el foco al panel y permite elegir por categoría", () => {
     renderWith(null);
     fireEvent.click(screen.getByRole("button", { name: "Configurar" }));
+    expect(screen.getByRole("heading", { name: "Preferencias de privacidad" })).toHaveFocus();
     fireEvent.click(screen.getByRole("switch", { name: "Mapas" }));
     fireEvent.click(screen.getByRole("button", { name: "Guardar preferencias" }));
     expect(readConsent()).toMatchObject({ statistics: false, maps: true });
@@ -90,23 +91,26 @@ describe("aviso de cookies", () => {
 });
 
 describe("registro de visitas según el consentimiento", () => {
-  it("sin elección o rechazado registra sin identificador", () => {
+  // El registro espera a que el navegador quede libre (whenIdle), de ahí los waitFor.
+  it("sin elección o rechazado registra sin identificador", async () => {
     renderWith(<Tracker />);
-    expect(trackPageView).toHaveBeenCalledWith("/", { withVisitorId: false });
+    await waitFor(() => expect(trackPageView).toHaveBeenCalledWith("/", { withVisitorId: false }), { timeout: 3000 });
   });
 
-  it("con estadísticas aceptadas registra con identificador", () => {
+  it("con estadísticas aceptadas registra con identificador", async () => {
     localStorage.setItem(
       CONSENT_KEY,
       JSON.stringify({ statistics: true, maps: false, version: PRIVACY_POLICY_VERSION, decidedAt: "2026-10-22T00:00:00Z" }),
     );
     renderWith(<Tracker />);
-    expect(trackPageView).toHaveBeenCalledWith("/", { withVisitorId: true });
+    await waitFor(() => expect(trackPageView).toHaveBeenCalledWith("/", { withVisitorId: true }), { timeout: 3000 });
   });
 
-  it("aceptar en el aviso no vuelve a contar la página actual", () => {
+  it("aceptar en el aviso no vuelve a contar la página actual", async () => {
     renderWith(<Tracker />);
     fireEvent.click(screen.getByRole("button", { name: "Aceptar todo" }));
+    await waitFor(() => expect(trackPageView).toHaveBeenCalled(), { timeout: 3000 });
+    await new Promise((r) => setTimeout(r, 1500));
     expect(trackPageView).toHaveBeenCalledTimes(1);
   });
 });
@@ -117,7 +121,7 @@ describe("mapa", () => {
     fireEvent.click(screen.getByRole("button", { name: "Rechazar" }));
     fireEvent.click(screen.getByRole("button", { name: "Ver mapa" }));
     expect(container.querySelector("iframe")).toBeNull();
-    expect(screen.getByRole("dialog", { name: "Permiso para cargar Google Maps" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Permiso para cargar Google Maps" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Aceptar y ver mapa" }));
     expect(container.querySelector('iframe[src*="google.com/maps"]')).not.toBeNull();

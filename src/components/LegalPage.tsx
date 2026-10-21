@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export const LegalPage = ({ eyebrow, title, intro, children }: { eyebrow: string; title: string; intro: ReactNode; children: ReactNode }) => (
   <>
     <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
-      <span className="text-sm font-semibold text-primary">{eyebrow}</span>
+      <span className="text-sm font-semibold text-[#5DCAA5]">{eyebrow}</span>
       <h1 className="text-3xl md:text-4xl font-semibold text-primary-foreground mt-3 mb-4">{title}</h1>
       <p className="text-primary-foreground/70 max-w-2xl mx-auto text-base">{intro}</p>
     </section>

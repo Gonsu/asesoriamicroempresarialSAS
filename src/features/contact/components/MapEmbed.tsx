@@ -44,7 +44,7 @@ const MapEmbed = () => {
       <div className="relative h-full flex flex-col items-center justify-center gap-3 bg-background/40 px-4 text-center">
         <MapPin className="w-8 h-8 text-primary" aria-hidden="true" />
         {asking ? (
-          <div role="dialog" aria-label="Permiso para cargar Google Maps" className="bg-card/95 rounded-lg p-4 max-w-sm shadow-md space-y-3">
+          <div role="group" aria-label="Permiso para cargar Google Maps" className="bg-card/95 rounded-lg p-4 max-w-sm shadow-md space-y-3">
             <p className="text-xs text-foreground">
               Para ver el mapa necesitamos tu permiso: Google Maps recibe tu IP y puede usar sus propias cookies. Más
               información en la{" "}

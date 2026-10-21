@@ -103,7 +103,7 @@ const TurnstileWidget = forwardRef<TurnstileHandle, { onToken: (token: string | 
         </p>
       );
     }
-    return <div ref={containerRef} className="min-h-[65px]" aria-label="Verificación anti-spam" />;
+    return <div ref={containerRef} role="group" aria-label="Verificación anti-spam" className="min-h-[65px]" />;
   },
 );
 TurnstileWidget.displayName = "TurnstileWidget";

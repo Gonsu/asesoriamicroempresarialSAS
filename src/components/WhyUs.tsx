@@ -42,7 +42,7 @@ const WhyUs = () => {
             {content.subtitle}
           </span>
         )}
-        <h3 className="text-2xl md:text-3xl font-semibold text-foreground">{content.title}</h3>
+        <h2 className="text-2xl md:text-3xl font-semibold text-foreground">{content.title}</h2>
       </div>
       <div className="grid md:grid-cols-2 gap-8 items-start">
         <div>
@@ -58,7 +58,7 @@ const WhyUs = () => {
                   {p.letter}
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-1">{p.title}</h4>
+                  <h3 className="text-sm font-semibold text-foreground mb-1">{p.title}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
                 </div>
               </div>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useLocation } from "react-router-dom";
 import { Target, Briefcase, Users } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -6,7 +7,10 @@ const tabs = [
   { id: "objetivos", label: "Objetivos", icon: Target },
   { id: "objeto", label: "Objeto Social", icon: Briefcase },
   { id: "comite", label: "Comité Asesor", icon: Users },
-];
+] as const;
+
+type TabId = (typeof tabs)[number]["id"];
+const isTab = (value: string): value is TabId => tabs.some((t) => t.id === value);
 
 const objetivosEspecificos = [
   "Lograr que la participación de Mercado de Asesoría Microempresarial S.A.S. tenga un crecimiento sostenido.",
@@ -24,24 +28,58 @@ const objetoSocial = [
 ];
 
 const CompanyDetails = () => {
-  const [activeTab, setActiveTab] = useState("objetivos");
+  const [activeTab, setActiveTab] = useState<TabId>("objetivos");
   const ref = useScrollReveal();
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const { hash } = useLocation();
+
+  // /empresa#objeto y /empresa#comite (menú "Nuestra empresa") abren su pestaña.
+  useEffect(() => {
+    const id = hash.slice(1);
+    if (isTab(id)) setActiveTab(id);
+  }, [hash]);
+
+  // Patrón de pestañas WAI-ARIA: flechas, Inicio y Fin mueven el foco y la selección.
+  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const index = tabs.findIndex((t) => t.id === activeTab);
+    const next =
+      e.key === "ArrowRight" ? (index + 1) % tabs.length
+      : e.key === "ArrowLeft" ? (index - 1 + tabs.length) % tabs.length
+      : e.key === "Home" ? 0
+      : e.key === "End" ? tabs.length - 1
+      : null;
+    if (next === null) return;
+    e.preventDefault();
+    setActiveTab(tabs[next].id);
+    tabRefs.current[tabs[next].id]?.focus();
+  };
 
   return (
-    <section id="objetivos" ref={ref} className="py-16 px-8 bg-card">
+    <section ref={ref} className="py-16 px-8 bg-card" aria-labelledby="empresa-detalles">
       <div className="text-center mb-10">
         <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
           Nuestra empresa
         </span>
-        <h3 className="text-2xl md:text-3xl font-semibold text-card-foreground mb-3">
+        <h2 id="empresa-detalles" className="text-2xl md:text-3xl font-semibold text-card-foreground mb-3">
           Conoce más sobre nosotros
-        </h3>
+        </h2>
       </div>
 
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
+      <div role="tablist" aria-label="Información de la empresa" className="flex justify-center gap-2 mb-8 flex-wrap">
         {tabs.map((tab) => (
           <button
             key={tab.id}
+            ref={(el) => {
+              tabRefs.current[tab.id] = el;
+            }}
+            // #objeto y #comite son destinos del menú; #objetivos ya es el contenedor de la sección.
+            id={tab.id === "objetivos" ? "tab-objetivos" : tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls="empresa-panel"
+            tabIndex={activeTab === tab.id ? 0 : -1}
+            onKeyDown={onTabKeyDown}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all ${
               activeTab === tab.id
@@ -49,16 +87,22 @@ const CompanyDetails = () => {
                 : "bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary"
             }`}
           >
-            <tab.icon size={14} />
+            <tab.icon size={14} aria-hidden="true" />
             {tab.label}
           </button>
         ))}
       </div>
 
-      <div className="max-w-3xl mx-auto">
+      <div
+        id="empresa-panel"
+        role="tabpanel"
+        aria-labelledby={activeTab === "objetivos" ? "tab-objetivos" : activeTab}
+        tabIndex={0}
+        className="max-w-3xl mx-auto"
+      >
         {activeTab === "objetivos" && (
           <div className="space-y-4 animate-in fade-in duration-300">
-            <h4 className="text-base font-semibold text-card-foreground mb-4">Objetivos Específicos</h4>
+            <h3 className="text-base font-semibold text-card-foreground mb-4">Objetivos Específicos</h3>
             {objetivosEspecificos.map((obj, i) => (
               <div key={i} className="flex gap-3 items-start bg-secondary/50 p-4 rounded-xl border border-border">
                 <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
@@ -72,7 +116,7 @@ const CompanyDetails = () => {
 
         {activeTab === "objeto" && (
           <div className="space-y-4 animate-in fade-in duration-300">
-            <h4 className="text-base font-semibold text-card-foreground mb-2">Objeto Social</h4>
+            <h3 className="text-base font-semibold text-card-foreground mb-2">Objeto Social</h3>
             <p className="text-xs text-muted-foreground mb-4">
               La sociedad tiene como objeto social, el desarrollo de las siguientes actividades:
             </p>
@@ -89,13 +133,13 @@ const CompanyDetails = () => {
 
         {activeTab === "comite" && (
           <div className="animate-in fade-in duration-300">
-            <h4 className="text-base font-semibold text-card-foreground mb-4">Comité Asesor</h4>
+            <h3 className="text-base font-semibold text-card-foreground mb-4">Comité Asesor</h3>
             <div className="bg-gradient-to-br from-ame-dark to-ame-mid rounded-2xl p-8 shadow-xl">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4F0E0] to-[#A8DFC0] flex items-center justify-center">
                   <Users size={18} className="text-primary" />
                 </div>
-                <h5 className="text-sm font-semibold text-primary-foreground">Junta Directiva</h5>
+                <h4 className="text-sm font-semibold text-primary-foreground">Junta Directiva</h4>
               </div>
               <p className="text-xs text-primary-foreground/70 leading-relaxed">
                 La Junta Directiva podrá crear comités asesores para realizar trabajos especializados, coordinados por el Gerente de la sociedad, para que estudien y sometan a consideración de la Junta Directiva, temas de importancia para la compañía. La Junta Directiva reglamentará la composición, funcionamiento y remuneración de los Comités Asesores.
