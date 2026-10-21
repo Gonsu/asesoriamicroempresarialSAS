@@ -33,7 +33,7 @@ mantenible, desplegable gratis y **sin depender de Lovable**.
 ## Comandos
 
 ```bash
-npm install          # instalar dependencias (npm ci falla hasta regenerar package-lock.json)
+npm ci               # instalar dependencias (npm es el único gestor de paquetes)
 npm run dev          # servidor de desarrollo en http://localhost:8080
 npm run build        # build de producción en dist/
 npm run build:dev    # build en modo development
@@ -44,15 +44,17 @@ npm run test:watch   # Vitest en modo watch
 npx tsc -p tsconfig.app.json --noEmit   # chequeo de tipos (vite build no lo hace)
 ```
 
-Variables de entorno (archivo `.env`, no versionar): `VITE_SUPABASE_URL`,
-`VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`.
+Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`):
+`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SITE_URL`. Si falta
+`VITE_SITE_URL`, `vite.config.ts` usa `http://localhost:8080` y avisa en el build.
 
 ## Estructura de carpetas
 
 ```
 .
-├── index.html                 # HTML base, meta OG/Twitter y JSON-LD de la empresa
-├── public/                    # favicon, robots.txt, sitemap.xml (se copian tal cual a dist/)
+├── index.html                 # HTML base y meta OG/Twitter (%VITE_SITE_URL%)
+├── public/                    # favicon y og-image.png (se copian tal cual a dist/);
+│                              # robots.txt y sitemap.xml los genera vite.config.ts
 ├── supabase/
 │   ├── config.toml            # project_id del proyecto Supabase
 │   └── migrations/            # esquema SQL: user_roles, meetings, site_content,
@@ -65,12 +67,12 @@ Variables de entorno (archivo `.env`, no versionar): `VITE_SUPABASE_URL`,
 │   │   │                      # StatsBand, Meetings, TestimonialsSection, CTA, Seo, ...)
 │   │   ├── admin/             # AdminDashboard, MeetingsManager, TestimonialsManager,
 │   │   │                      # ContentEditor
-│   │   └── ui/                # componentes shadcn/ui (la mayoría sin uso)
+│   │   └── ui/                # componentes shadcn/ui en uso
+│   ├── config/site.ts         # datos de la empresa, URL del sitio y JSON-LD
 │   ├── contexts/AuthContext.tsx   # sesión Supabase y rol admin (tabla user_roles)
-│   ├── hooks/                 # use-toast, useScrollReveal, useScrollDirection, use-mobile
+│   ├── hooks/                 # use-toast, useScrollReveal, useScrollDirection
 │   ├── integrations/
-│   │   ├── supabase/          # client.ts y types.ts (tipos generados de la BD)
-│   │   └── lovable/           # login con Google vía Lovable (a eliminar)
+│   │   └── supabase/          # client.ts y types.ts (tipos generados de la BD)
 │   ├── lib/                   # utils.ts (cn), storageImage.ts (URLs firmadas)
 │   ├── assets/                # imágenes importadas por Vite
 │   └── test/                  # setup de Vitest y test de ejemplo
