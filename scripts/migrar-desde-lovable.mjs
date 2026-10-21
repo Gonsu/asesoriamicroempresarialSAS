@@ -65,7 +65,7 @@ async function exportData() {
   const url = env("OLD_SUPABASE_URL").replace(/\/+$/, "");
   const key = env("OLD_SUPABASE_KEY");
   const token = env("OLD_ACCESS_TOKEN", { optional: true });
-  if (token && !/^[w-]+.[w-]+.[w-]+$/.test(token)) {
+  if (token && !/^[\w-]+\.[\w-]+\.[\w-]+$/.test(token)) {
     throw new Error("OLD_ACCESS_TOKEN no parece un token (¿el portapapeles tenía otra cosa?). Cópialo de nuevo.");
   }
   const email = env("OLD_ADMIN_EMAIL", { optional: true });
