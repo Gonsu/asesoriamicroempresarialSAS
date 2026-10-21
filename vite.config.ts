@@ -1,6 +1,7 @@
-import { defineConfig, loadEnv, type Plugin } from "vite";
+import { defineConfig, loadEnv, type HtmlTagDescriptor, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { buildMetaTags, buildOrganizationJsonLd, seoDefaults } from "./src/config/site";
 
 const DEFAULT_SITE_URL = "http://localhost:8080";
 
@@ -13,7 +14,21 @@ const sitemapRoutes = [
   { path: "/contacto", changefreq: "yearly", priority: "0.7" },
 ];
 
-// Genera robots.txt y sitemap.xml en dist/ con la URL del sitio.
+// Inserta en index.html el título, las etiquetas description/og:/twitter: y el JSON-LD por
+// defecto, para los rastreadores que no ejecutan JS (WhatsApp, Facebook). Las etiquetas meta
+// llevan data-rh para que react-helmet-async (Seo) las reemplace en cada página.
+function seoHtmlTags(siteUrl: string): HtmlTagDescriptor[] {
+  const jsonLd = JSON.stringify(buildOrganizationJsonLd(siteUrl), null, 2).replace(/</g, "\\u003c");
+  return [
+    { tag: "title", children: seoDefaults.title, injectTo: "head" },
+    ...buildMetaTags(siteUrl, seoDefaults).map(
+      (attrs): HtmlTagDescriptor => ({ tag: "meta", attrs: { ...attrs, "data-rh": "true" }, injectTo: "head" }),
+    ),
+    { tag: "script", attrs: { type: "application/ld+json" }, children: jsonLd, injectTo: "head" },
+  ];
+}
+
+// Genera las etiquetas SEO de index.html y, en el build, robots.txt y sitemap.xml.
 function seoFiles(siteUrl: string): Plugin {
   const robots = `User-agent: *
 Allow: /
@@ -38,7 +53,9 @@ ${urls}
 `;
   return {
     name: "seo-files",
-    apply: "build",
+    transformIndexHtml() {
+      return seoHtmlTags(siteUrl);
+    },
     generateBundle() {
       this.emitFile({ type: "asset", fileName: "robots.txt", source: robots });
       this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap });
