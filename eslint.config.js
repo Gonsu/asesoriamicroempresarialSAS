@@ -21,6 +21,27 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Nada de HTML sin escapar: el contenido editable y los mensajes se muestran como texto.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message: "No uses dangerouslySetInnerHTML: muestra el contenido como texto.",
+        },
+        {
+          selector: "AssignmentExpression[left.property.name=/^(innerHTML|outerHTML)$/]",
+          message: "No asignes innerHTML/outerHTML: usa textContent o JSX.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='insertAdjacentHTML']",
+          message: "No uses insertAdjacentHTML.",
+        },
+      ],
     },
+  },
+  {
+    // Los tests pueden limpiar el DOM con innerHTML.
+    files: ["**/*.test.{ts,tsx}"],
+    rules: { "no-restricted-syntax": "off" },
   },
 );

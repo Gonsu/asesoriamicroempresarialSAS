@@ -19,7 +19,9 @@ const Seo = ({ title, description, path, noindex, jsonLd }: SeoProps) => {
       {buildMetaTags(site.url, { title, description, url }).map((tag) => (
         <meta key={"name" in tag ? tag.name : tag.property} {...tag} />
       ))}
-      {jsonLd && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
+      {/* Helmet escribe el texto tal cual dentro de <script>: se escapa "<" para que un valor
+          con "</script>" no pueda cerrar la etiqueta. */}
+      {jsonLd && <script type="application/ld+json">{JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>}
     </Helmet>
   );
 };

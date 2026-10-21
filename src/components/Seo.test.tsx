@@ -38,4 +38,22 @@ describe("Seo", () => {
     expect(contentOf('meta[property="og:image"]')).toEqual([`${site.url}${seoDefaults.image.path}`]);
     expect(contentOf('meta[name="twitter:card"]')).toEqual(["summary_large_image"]);
   });
+
+  it("escapa el JSON-LD para que un valor no pueda cerrar la etiqueta <script>", async () => {
+    const name = "</script><img src=x onerror=alert(1)>";
+    render(
+      <HelmetProvider>
+        <Seo title="T" description="D" path="/" jsonLd={{ name }} />
+      </HelmetProvider>,
+    );
+
+    const script = await waitFor(() => {
+      const el = document.head.querySelector('script[type="application/ld+json"]');
+      expect(el).not.toBeNull();
+      return el as HTMLScriptElement;
+    });
+    expect(script.textContent).not.toContain("</script>");
+    expect(JSON.parse(script.textContent ?? "")).toEqual({ name });
+    expect(document.head.querySelector("img")).toBeNull();
+  });
 });
