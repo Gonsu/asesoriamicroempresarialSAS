@@ -9,10 +9,13 @@
     "types": [
       "vitest/globals",
       "node"
-    ]
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": [
-    "src"
+    "src",
+    "supabase/functions/contact/handler.ts",
+    "supabase/functions/contact/handler.test.ts"
   ],
   "exclude": []
 }
