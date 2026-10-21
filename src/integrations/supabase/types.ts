@@ -174,7 +174,19 @@ export type Database = {
     Functions: {
       human_page_views: {
         Args: { p_desde: string; p_hasta: string };
-        Returns: Database["public"]["Tables"]["page_views"]["Row"][];
+        Returns: {
+          created_at: string;
+          id: string;
+          page: string;
+          user_agent: string | null;
+          visitor_id: string;
+        }[];
+        SetofOptions: {
+          from: "*";
+          to: "page_views";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
       };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_bot_user_agent: { Args: { p_user_agent: string }; Returns: boolean };
@@ -190,11 +202,18 @@ export type Database = {
       };
       page_view_stats: {
         Args: { p_desde: string; p_hasta: string };
-        Returns: { mes: string; visitantes_unicos: number; visitas: number }[];
+        Returns: {
+          mes: string;
+          visitantes_unicos: number;
+          visitas: number;
+        }[];
       };
       page_view_totals: {
         Args: { p_desde: string; p_hasta: string };
-        Returns: { visitantes_unicos: number; visitas: number }[];
+        Returns: {
+          visitantes_unicos: number;
+          visitas: number;
+        }[];
       };
     };
     Enums: {
