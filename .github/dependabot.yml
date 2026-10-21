@@ -1,0 +1,36 @@
+# Actualizaciones automáticas de dependencias. Las alertas de seguridad de Dependabot se
+# activan aparte en GitHub: Settings → Code security → Dependabot alerts / security updates.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: America/Bogota
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencias
+    groups:
+      # Un solo PR semanal con todas las versiones menores y parches.
+      menores:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # Saltos mayores que son decisiones de proyecto, no actualizaciones rutinarias.
+      - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react-dom
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react-router-dom
+        update-types: ["version-update:semver-major"]
