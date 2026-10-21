@@ -82,6 +82,15 @@ async function exportData() {
     console.log("Sin sesión de admin: solo contenido publicado, sin visitas.");
   }
 
+  // Con una cuenta sin rol admin RLS devolvería solo lo publicado, sin avisar.
+  if (isAdmin) {
+    const { data: auth } = await db.auth.getUser(token);
+    const { data: admin, error } = await db.rpc("is_admin", { _user_id: auth.user.id });
+    if (error || !admin) {
+      throw new Error(`La cuenta ${auth.user.email} no es admin en el proyecto viejo; usa la cuenta admin.`);
+    }
+  }
+
   const data = {
     exported_at: new Date().toISOString(),
     complete: isAdmin,
