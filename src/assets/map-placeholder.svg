@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice">
+  <!-- Ilustración genérica de un mapa (no es un mapa real). Se muestra antes de cargar Google Maps. -->
+  <rect width="640" height="360" fill="#eef3ef"/>
+  <path d="M0 250 Q160 210 320 240 T640 220 V360 H0Z" fill="#dbe9df"/>
+  <path d="M430 0 Q470 120 520 180 T600 360 H640 V0Z" fill="#d6e6f2"/>
+  <g stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="round">
+    <path d="M-10 120 H650"/>
+    <path d="M-10 290 Q300 260 650 300"/>
+    <path d="M180 -10 V370"/>
+    <path d="M360 -10 Q340 180 380 370"/>
+  </g>
+  <g stroke="#ffffff" stroke-width="6" fill="none">
+    <path d="M-10 60 H650"/>
+    <path d="M-10 190 H650"/>
+    <path d="M90 -10 V370"/>
+    <path d="M270 -10 V370"/>
+    <path d="M520 -10 V370"/>
+  </g>
+  <g fill="#c9d8cd">
+    <rect x="200" y="135" width="50" height="40" rx="4"/>
+    <rect x="110" y="75" width="55" height="32" rx="4"/>
+    <rect x="290" y="205" width="50" height="45" rx="4"/>
+    <rect x="390" y="75" width="40" height="32" rx="4"/>
+    <rect x="110" y="205" width="55" height="45" rx="4"/>
+  </g>
+</svg>

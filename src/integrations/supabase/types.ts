@@ -9,6 +9,34 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string;
+          email: string;
+          id: string;
+          is_read: boolean;
+          message: string;
+          name: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          email: string;
+          id?: string;
+          is_read?: boolean;
+          message: string;
+          name: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string;
+          id?: string;
+          is_read?: boolean;
+          message?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
       meetings: {
         Row: {
           created_at: string;
@@ -172,6 +200,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      contact_rate_limit_hit: { Args: { p_ip: string }; Returns: boolean };
       human_page_views: {
         Args: { p_desde: string; p_hasta: string };
         Returns: {

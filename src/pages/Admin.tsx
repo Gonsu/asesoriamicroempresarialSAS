@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote } from "lucide-react";
+import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote, Inbox } from "lucide-react";
 import { ListSkeleton } from "@/components/QueryState";
 
 // Cada pestaña es un chunk aparte: solo se descarga al abrirla.
@@ -10,12 +10,14 @@ const AdminDashboard = lazy(() => import("@/features/analytics/components/AdminD
 const MeetingsManager = lazy(() => import("@/features/meetings/components/MeetingsManager"));
 const TestimonialsManager = lazy(() => import("@/features/testimonials/components/TestimonialsManager"));
 const ContentEditor = lazy(() => import("@/features/content/components/ContentEditor"));
+const ContactMessagesManager = lazy(() => import("@/features/contact/components/ContactMessagesManager"));
 
 const tabs = [
   { id: "dashboard", label: "Estadísticas", icon: BarChart3 },
   { id: "meetings", label: "Reuniones", icon: Calendar },
   { id: "testimonials", label: "Testimonios", icon: MessageSquareQuote },
   { id: "content", label: "Contenido", icon: FileText },
+  { id: "messages", label: "Mensajes", icon: Inbox },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -55,7 +57,7 @@ const Admin = () => {
 
       {/* Tabs */}
       <div className="border-b border-border bg-card">
-        <div className="max-w-4xl mx-auto flex">
+        <div className="max-w-4xl mx-auto flex overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -79,6 +81,7 @@ const Admin = () => {
           {activeTab === "meetings" && <MeetingsManager />}
           {activeTab === "testimonials" && <TestimonialsManager />}
           {activeTab === "content" && <ContentEditor />}
+          {activeTab === "messages" && <ContactMessagesManager />}
         </Suspense>
       </main>
     </div>

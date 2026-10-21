@@ -96,6 +96,9 @@ export default defineConfig(({ command, mode }) => {
   if (!supabaseUrl && command === "build") {
     throw new Error("[vite] Falta VITE_SUPABASE_URL: se necesita para la Content-Security-Policy.");
   }
+  if (!env.VITE_TURNSTILE_SITE_KEY && command === "build") {
+    console.warn("\n[vite] VITE_TURNSTILE_SITE_KEY no está definida; se usa la clave de prueba de Turnstile.\n");
+  }
 
   return {
     server: {

@@ -1,23 +1,42 @@
 import Seo from "@/components/Seo";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Phone, Mail, MapPin, Facebook, Instagram, Send } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Send, CheckCircle2 } from "lucide-react";
 import { mailtoUrl, site } from "@/config/site";
 import { FieldError } from "@/components/QueryState";
-import { contactMailto, contactSchema, type ContactFormValues } from "@/features/contact/schema";
+import { contactSchema, type ContactFormValues } from "@/features/contact/schema";
+import { useSendContactMessage } from "@/features/contact/hooks";
+import MapEmbed from "@/features/contact/components/MapEmbed";
+import TurnstileWidget, { type TurnstileHandle } from "@/features/contact/components/TurnstileWidget";
 
 const Contacto = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: { name: "", email: "", message: "" },
   });
+  const send = useSendContactMessage();
+  const turnstile = useRef<TurnstileHandle>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
-  const onSubmit = (values: ContactFormValues) => {
-    window.location.href = contactMailto(mailtoUrl, values);
+  const onSubmit = async (values: ContactFormValues) => {
+    if (!token) return;
+    try {
+      await send.mutateAsync({ values, token });
+      reset();
+      setSent(true);
+    } catch {
+      // El mensaje de error se muestra debajo del botón (send.error).
+    } finally {
+      // Cada token de Turnstile sirve una sola vez.
+      turnstile.current?.reset();
+    }
   };
 
   return (
@@ -113,68 +132,83 @@ const Contacto = () => {
               </div>
             </div>
 
-            <a
-              href={site.address.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 rounded-lg border border-border bg-primary/5 hover:bg-primary/10 transition-colors px-4 py-6 text-sm font-medium text-primary"
-            >
-              <MapPin size={18} /> Ver ubicación en Google Maps
-            </a>
+            <div className="mt-6">
+              <MapEmbed />
+            </div>
           </div>
 
           {/* Form */}
           <div>
             <h2 className="text-2xl font-semibold text-foreground mb-6">Envíanos un mensaje</h2>
-            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 bg-card p-6 rounded-lg border border-border">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Nombre</label>
-                <input
-                  id="name"
-                  type="text"
-                  autoComplete="name"
-                  aria-invalid={!!errors.name}
-                  aria-describedby="name-error"
-                  {...register("name")}
-                  className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-                />
-                <FieldError id="name-error" message={errors.name?.message} />
+            {sent ? (
+              <div role="status" className="bg-card p-6 rounded-lg border border-border text-center space-y-3">
+                <CheckCircle2 className="w-10 h-10 mx-auto text-primary" aria-hidden="true" />
+                <p className="text-base font-semibold text-foreground">¡Gracias! Recibimos tu mensaje.</p>
+                <p className="text-sm text-muted-foreground">Te responderemos al correo que nos dejaste.</p>
+                <button type="button" onClick={() => setSent(false)} className="text-sm text-primary hover:underline">
+                  Enviar otro mensaje
+                </button>
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Correo</label>
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  aria-invalid={!!errors.email}
-                  aria-describedby="email-error"
-                  {...register("email")}
-                  className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-                />
-                <FieldError id="email-error" message={errors.email?.message} />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1.5">Mensaje</label>
-                <textarea
-                  id="message"
-                  rows={5}
-                  aria-invalid={!!errors.message}
-                  aria-describedby="message-error"
-                  {...register("message")}
-                  className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-                />
-                <FieldError id="message-error" message={errors.message?.message} />
-              </div>
-              <button
-                type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-md text-sm font-semibold hover:bg-primary/90 transition-colors"
-              >
-                <Send size={16} /> Enviar mensaje
-              </button>
-              <p className="text-xs text-muted-foreground text-center">
-                Se abrirá tu cliente de correo con el mensaje listo para enviar.
-              </p>
-            </form>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 bg-card p-6 rounded-lg border border-border">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Nombre</label>
+                  <input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    aria-invalid={!!errors.name}
+                    aria-describedby="name-error"
+                    {...register("name")}
+                    className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  <FieldError id="name-error" message={errors.name?.message} />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Correo</label>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    aria-invalid={!!errors.email}
+                    aria-describedby="email-error"
+                    {...register("email")}
+                    className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  <FieldError id="email-error" message={errors.email?.message} />
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1.5">Mensaje</label>
+                  <textarea
+                    id="message"
+                    rows={5}
+                    aria-invalid={!!errors.message}
+                    aria-describedby="message-error"
+                    {...register("message")}
+                    className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                  />
+                  <FieldError id="message-error" message={errors.message?.message} />
+                </div>
+                <TurnstileWidget ref={turnstile} onToken={setToken} />
+                <button
+                  type="submit"
+                  disabled={!token || send.isPending}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-md text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Send size={16} /> {send.isPending ? "Enviando..." : "Enviar mensaje"}
+                </button>
+                {send.error && (
+                  <p role="alert" className="text-sm text-destructive text-center">
+                    {send.error.message}
+                  </p>
+                )}
+                {!token && !send.isPending && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Completa la verificación anti-spam para enviar el mensaje.
+                  </p>
+                )}
+              </form>
+            )}
           </div>
         </div>
       </section>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loginSchema } from "./auth/schema";
-import { contactMailto, contactSchema } from "./contact/schema";
+import { contactSchema } from "./contact/schema";
 import { sectionSchema } from "./content/schema";
 import { emptyMeeting, fromDateTimeInput, meetingSchema, toDateTimeInput } from "./meetings/schema";
 import { emptyTestimonial, testimonialSchema } from "./testimonials/schema";
@@ -31,15 +31,10 @@ describe("contactSchema", () => {
       email: "El correo no es válido.",
       message: "El mensaje debe tener al menos 10 caracteres.",
     });
-    expect(errorsOf(contactSchema.safeParse({ name: "Ana", email: "a@b.co", message: "x".repeat(1501) }))).toEqual({
-      message: "Máximo 1500 caracteres.",
+    expect(errorsOf(contactSchema.safeParse({ name: "Ana", email: "a@b.co", message: "x".repeat(2001) }))).toEqual({
+      message: "Máximo 2000 caracteres.",
     });
-  });
-
-  it("arma el enlace mailto", () => {
-    const url = contactMailto("mailto:a@b.co", { name: "Ana", email: "ana@x.co", message: "Hola & chao" });
-    expect(url.startsWith("mailto:a@b.co?subject=Contacto%20desde%20la%20web")).toBe(true);
-    expect(decodeURIComponent(url.split("body=")[1])).toContain("Mensaje:\nHola & chao");
+    expect(contactSchema.safeParse({ name: "Ana", email: "a@b.co", message: "x".repeat(2000) }).success).toBe(true);
   });
 });
 
