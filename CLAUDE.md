@@ -11,7 +11,7 @@ mantenible, desplegable gratis y **sin depender de Lovable**.
 - **Panel admin:** `/login` y `/admin` — estadísticas, CRUD de reuniones y testimonios,
   editor de contenido.
 - **Stack:** Vite 5 + React 18 + TypeScript + Tailwind + shadcn/ui + React Router 6 +
-  Supabase (Postgres, Auth, Storage). TanStack Query y react-helmet-async instalados.
+  Supabase (Postgres, Auth, Storage) + TanStack Query + zod + react-hook-form + react-helmet-async.
 - **Hosting objetivo:** Cloudflare Pages (plan gratuito) en un subdominio `*.pages.dev`
   (aún no hay dominio propio). SPA: Cloudflare Pages sirve `index.html` como fallback si
   no existe `404.html` en `dist/`.
@@ -39,7 +39,7 @@ npm run dev          # servidor de desarrollo en http://localhost:8080
 npm run build        # build de producción en dist/
 npm run build:dev    # build en modo development
 npm run preview      # servir dist/ localmente
-npm run lint         # ESLint
+npm run lint         # ESLint (falla también con avisos: --max-warnings 0)
 npm test             # Vitest (una pasada)
 npm run test:watch   # Vitest en modo watch
 npx tsc -p tsconfig.app.json --noEmit   # chequeo de tipos (vite build no lo hace)
@@ -64,27 +64,36 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   └── migrar-desde-lovable.mjs   # exporta/importa datos e imágenes de Lovable Cloud
 ├── supabase/
 │   ├── config.toml            # config local de la CLI (auth, Google, registro desactivado)
-│   ├── migrations/            # esquema SQL consolidado: tablas, RLS, is_admin, bucket
-│   └── seed.sql               # contenido de ejemplo (local)
+│   ├── migrations/            # esquema inicial (tablas, RLS, is_admin, bucket) y
+│   │                          # funciones de estadísticas (por período, sin bots)
+│   └── seed.sql               # textos reales de site_content (upsert) + ejemplos locales
 ├── src/
-│   ├── main.tsx / App.tsx     # arranque y rutas (Layout envuelve las páginas públicas)
+│   ├── main.tsx / App.tsx     # arranque, rutas (React.lazy salvo Inicio), ErrorBoundary
 │   ├── pages/                 # Index, Empresa, Servicios, Reuniones, Contacto,
-│   │                          # Login, Admin, NotFound
+│   │                          # Login, Admin (pestañas en diferido), NotFound
+│   ├── features/              # cada una: service.ts (consultas Supabase), hooks.ts
+│   │   │                      # (TanStack Query), schema.ts (zod) y components/
+│   │   ├── analytics/         # tracker, estadísticas por período, CSV, filtro de bots
+│   │   ├── content/           # textos de site_content (defaults.ts) y ContentEditor
+│   │   ├── meetings/          # MeetingsSection (pública) y MeetingsManager (admin)
+│   │   ├── testimonials/      # TestimonialsSection (pública) y TestimonialsManager
+│   │   ├── auth/ contact/     # esquemas de los formularios de login y contacto
+│   │   └── schemas.test.ts    # tests de los esquemas de formularios
 │   ├── components/            # secciones públicas (Header, Footer, TopBar, HeroSimple,
-│   │   │                      # StatsBand, Meetings, TestimonialsSection, CTA, Seo, ...)
-│   │   ├── admin/             # AdminDashboard, MeetingsManager, TestimonialsManager,
-│   │   │                      # ContentEditor
+│   │   │                      # StatsBand, CTA, Seo, ...), ErrorBoundary, QueryState
+│   │   │                      # (error/vacío/skeleton/FieldError), ConfirmDeleteButton
 │   │   └── ui/                # componentes shadcn/ui en uso
 │   ├── config/site.ts         # datos de la empresa, URL del sitio y JSON-LD
-│   ├── contexts/AuthContext.tsx   # sesión Supabase y rol admin (tabla user_roles)
-│   ├── hooks/                 # use-toast, useScrollReveal, useScrollDirection
+│   ├── contexts/              # AuthContext (proveedor), auth-context y useAuth
+│   ├── hooks/                 # use-toast, useNotify, useScrollReveal, useScrollDirection
 │   ├── integrations/
 │   │   └── supabase/          # client.ts y types.ts (tipos generados de la BD)
-│   ├── lib/                   # utils.ts (cn), storageImage.ts (subir/borrar/URL de imágenes)
+│   ├── lib/                   # utils.ts (cn), storageImage.ts (subir/borrar/URL de imágenes),
+│   │                          # imageField.ts (validación zod de imágenes)
 │   ├── assets/                # imágenes importadas por Vite
-│   └── test/                  # setup de Vitest y test de ejemplo
+│   └── test/                  # setup de Vitest
 ├── vite.config.ts / vitest.config.ts / tailwind.config.ts / eslint.config.js
-└── tsconfig*.json             # TypeScript sin modo estricto en la app
+└── tsconfig*.json             # TypeScript en modo estricto
 ```
 
 ## Modelo de datos y seguridad (Supabase)
@@ -100,46 +109,28 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
   (`image_path`), nunca la URL; la URL se arma con `imageUrl()` de `storageImage.ts`.
 - Auth: registro público desactivado; login con contraseña o Google (solo cuentas existentes).
 - La autorización real está en RLS; las comprobaciones de `isAdmin` en el frontend son solo UX.
+- Solo `AuthContext`, `lib/storageImage.ts` y los `service.ts` de `features/` importan `supabase`;
+  los componentes usan los hooks.
+- Estadísticas: funciones SQL `security invoker` (`page_view_stats`, `page_view_totals`,
+  `meeting_stats`) por período en `America/Bogota`; excluyen bots con `is_bot_user_agent`,
+  cuya regex debe coincidir con `features/analytics/bots.ts` (lo comprueba un test).
+- `site_content`: textos por defecto en `features/content/defaults.ts`, iguales a `seed.sql`
+  (lo comprueba un test). `extra_data.highlight` = palabra resaltada del título del hero.
 
-## Problemas conocidos (diagnóstico inicial, 2026-10-20)
+## Problemas conocidos
 
-**Dependencia de Lovable**
-- `@lovable.dev/cloud-auth-js` (`src/integrations/lovable/`, botón Google en `Login.tsx`),
-  `lovable-tagger` en `vite.config.ts`, carpeta `.lovable/`, `README.md` de plantilla.
-- `playwright.config.ts` y `playwright-fixture.ts` importan `lovable-agent-playwright-config`,
-  que no está en `package.json` (no hay tests e2e).
-- URLs `asesoriamicroempresarialsas.lovable.app` en `Seo.tsx`, `index.html`, `robots.txt`,
-  `sitemap.xml`; imagen OG en `storage.googleapis.com/gpt-engineer-file-uploads`;
-  `twitter:site` = `@Lovable`.
+Pendientes (estado al terminar el paso 3, 2026-10-21):
 
-**Repositorio y dependencias**
-- `package-lock.json` desincronizado (`npm ci` falla: faltan react-helmet-async, @testing-library/dom…).
-- Tres lockfiles (`package-lock.json`, `bun.lock`, `bun.lockb`).
-- `.env` incluido y **no** listado en `.gitignore` (contiene la clave `anon`, no la service_role).
-- `npm audit`: 41 vulnerabilidades (2 críticas, 31 altas) con dependencias actuales;
-  `xlsx` sin corrección en npm.
+- `npm audit`: 14 vulnerabilidades (2 críticas, 6 altas), todas en vite, vitest, tailwindcss y
+  react-router-dom o sus dependencias. Corregirlas exige subir de versión mayor
+  (vite 8, vitest 5, tailwindcss 4, react-router-dom 7).
+- `cucuta-real.png` (670 KB) se sirve sin optimizar.
+- El formulario de contacto usa `mailto:`, así que no envía nada por sí mismo.
+- Login con Google: falta configurarlo en producción (`docs/supabase.md`, sección 5).
 
-**Funcionalidad**
-- `ContentEditor` guarda en `site_content`, pero ninguna página pública lo lee.
-- `AdminDashboard` descarga `page_views` y `meetings` completos (máx. 1000 filas por
-  petición en Supabase) y agrega en el navegador; el selector mes/año solo cambia la
-  etiqueta y el nombre del archivo Excel, no filtra datos.
-- `PageViewTracker` está en `Layout` con `useEffect([])`: solo registra la primera página
-  de la visita, no las navegaciones internas.
-- Admin: borrar no pide confirmación; `<Switch>` (button) anidado dentro de `<Button>` en
-  TestimonialsManager.
-- Formulario de contacto con `mailto:`. `sitemap.xml` no incluye `/reuniones`.
-
-**Calidad de código**
-- TypeScript sin modo estricto (`strict: false`, `noImplicitAny: false`).
-- `npm run lint`: 11 errores (8 `no-explicit-any` en admin, 2 `no-empty-object-type` en ui,
-  1 `require` en tailwind.config.ts) y 8 avisos.
-- `console.log` en `AuthContext.tsx`.
-- Sin uso: 39 archivos de `src/components/ui` (solo se usan button, input, label, skeleton,
-  sonner, switch, textarea, toast, toaster, tooltip), `Hero`, `Services`, `NavLink`,
-  `hooks/use-mobile`, `App.css`, y las imágenes `banner-ame.png`, `about-cucuta.jpg`,
-  `logo-ame-full.avif`.
-- Un solo bundle JS de ~955 KB (sin code splitting); `cucuta-real.png` (670 KB) se usa sin optimizar.
-- Teléfono y correo repetidos en 7 archivos (CTA, Footer, TopBar, FloatingWhatsApp,
-  Contacto, Servicios, index.html).
-- Solo hay un test de ejemplo (`expect(true).toBe(true)`).
+Resueltos del diagnóstico inicial (2026-10-20): dependencia de Lovable, lockfiles duplicados,
+`.env` versionado, `site_content` sin uso, estadísticas calculadas en el navegador con un
+selector que no filtraba, tracker que solo registraba la primera página, borrado sin
+confirmación, `<Switch>` dentro de `<Button>`, TypeScript no estricto, errores de lint,
+`console.log`, código y componentes sin uso, teléfono y correo repetidos, `/reuniones` fuera
+del sitemap, bundle único de ~955 KB y falta de tests. El detalle está en el historial de git.

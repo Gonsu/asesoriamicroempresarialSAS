@@ -221,3 +221,20 @@ npx prettier@3.3.3 --write src/integrations/supabase/types.ts
   - escritura solo para admins en `meetings/`, `testimonials/` y `content/`;
   - límite de 2 MB y solo `image/jpeg`, `image/png` e `image/webp`.
 - **Registro público desactivado.** Las cuentas solo las crea un administrador del proyecto.
+- **Estadísticas:** `page_view_stats`, `page_view_totals`, `meeting_stats` y `human_page_views` son `SECURITY INVOKER`. La RLS de cada tabla sigue aplicando, así que solo un admin obtiene cifras. `anon` no puede ejecutarlas.
+
+## 9. Contenido editable y estadísticas
+
+**Textos del sitio (`site_content`)**
+
+- Los textos por defecto están en `src/features/content/defaults.ts`. Las páginas los muestran mientras carga la consulta, si falla o si un campo está vacío en la base de datos.
+- Secciones: `hero`, `home_about` (Quiénes somos en Inicio), `about` (Empresa), `services`, `whyus`, `cta` y `footer`.
+- `subtitle` es la etiqueta pequeña sobre el encabezado, `title` el encabezado y `description` el texto. Una línea en blanco separa párrafos.
+- En el hero, `extra_data.highlight` es la palabra del título que va resaltada. Si no aparece tal cual en el título, no se resalta nada.
+- `supabase/seed.sql` tiene los mismos textos como upsert, y un test lo comprueba. Para restaurar los textos originales en producción, ejecuta en el **SQL Editor** el primer `insert … on conflict (section_key) do update` de `seed.sql`. No ejecutes el resto del seed: crea reuniones y testimonios de ejemplo.
+
+**Estadísticas**
+
+- El panel usa las funciones de la migración `20261021000000_estadisticas.sql`. Agregan las cifras en SQL por un período de fechas locales de Cúcuta (`America/Bogota`), con las dos fechas incluidas.
+- Las visitas de bots y vistas previas de enlaces (WhatsApp, Facebook, Telegram, Googlebot…) se excluyen al consultar con `public.is_bot_user_agent`, así que el filtro también vale para las visitas antiguas.
+- El tracker del frontend tampoco inserta esas visitas. Su expresión regular (`src/features/analytics/bots.ts`) debe ser la misma que la de SQL; un test lo comprueba.
