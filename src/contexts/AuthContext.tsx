@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -8,6 +8,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -18,6 +19,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Usuario cuyo rol ya se consultó; evita repetir la consulta en cada TOKEN_REFRESHED.
+  const checkedUserId = useRef<string | null>(null);
 
   const checkAdmin = async (userId: string) => {
     try {
@@ -42,45 +45,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // Listener: solo actualiza sesión sincrónicamente, difiere consultas
+    // Se dispara también al suscribirse (INITIAL_SESSION), así que cubre la carga inicial
+    // y el regreso del login con Google. loading sigue en true hasta conocer el rol, para
+    // que /admin no redirija a /login antes de tiempo.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
         if (!mounted) return;
         setSession(newSession);
         setUser(newSession?.user ?? null);
-        if (newSession?.user) {
-          // Diferir para evitar deadlock dentro del callback
-          setTimeout(() => {
-            if (mounted) checkAdmin(newSession.user.id);
-          }, 0);
-        } else {
-          setIsAdmin(false);
+
+        const userId = newSession?.user.id ?? null;
+        if (userId === checkedUserId.current) {
+          setLoading(false);
+          return;
         }
-        setLoading(false);
+        checkedUserId.current = userId;
+
+        if (!userId) {
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
+
+        setLoading(true);
+        // Diferir para evitar deadlock dentro del callback
+        setTimeout(async () => {
+          if (!mounted) return;
+          await checkAdmin(userId);
+          if (mounted && checkedUserId.current === userId) setLoading(false);
+        }, 0);
       }
     );
-
-    // Chequeo inicial
-    (async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) console.error("[AUTH] Error getSession:", error);
-        if (!mounted) return;
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-        if (data.session?.user) {
-          await checkAdmin(data.session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (err) {
-        console.error("[AUTH] Excepción en init:", err);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    })();
 
     // Fail-safe: nunca quedarse cargando más de 5s
     const failSafe = setTimeout(() => {
@@ -102,13 +97,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
+  // Solo entra si la cuenta ya existe: el registro público está desactivado en Supabase.
+  // Vuelve a /login, que muestra el error o redirige a /admin según el rol.
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/login` },
+    });
+    return { error: error as Error | null };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
