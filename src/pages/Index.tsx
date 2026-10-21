@@ -5,6 +5,7 @@ import HeroSimple from "@/components/HeroSimple";
 import StatsBand from "@/components/StatsBand";
 import CTA from "@/components/CTA";
 import aboutCucuta from "@/assets/cucuta-real.png";
+import { organizationJsonLd } from "@/config/site";
 
 const featured = [
   {
@@ -30,6 +31,7 @@ const Index = () => (
       title="Asesoría empresarial para microempresas en Cúcuta | AME S.A.S."
       description="AME S.A.S. brinda asesoría financiera, gestión administrativa y consultoría empresarial para microempresas en Cúcuta y Norte de Santander."
       path="/"
+      jsonLd={organizationJsonLd}
     />
     <HeroSimple />
     <StatsBand />

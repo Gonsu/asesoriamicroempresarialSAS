@@ -1,6 +1,5 @@
 import { Helmet } from "react-helmet-async";
-
-const SITE = "https://asesoriamicroempresarialsas.lovable.app";
+import { site } from "@/config/site";
 
 interface SeoProps {
   title: string;
@@ -11,7 +10,7 @@ interface SeoProps {
 }
 
 const Seo = ({ title, description, path, noindex, jsonLd }: SeoProps) => {
-  const url = `${SITE}${path}`;
+  const url = `${site.url}${path}`;
   return (
     <Helmet>
       <title>{title}</title>
