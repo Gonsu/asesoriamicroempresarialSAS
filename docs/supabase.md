@@ -157,11 +157,22 @@ Haz la migración en este orden:
    ```powershell
    $env:OLD_SUPABASE_URL = "https://dddqlypayckwzytnmzem.supabase.co"
    $env:OLD_SUPABASE_KEY = "<VITE_SUPABASE_PUBLISHABLE_KEY del .env actual>"
-   # Opcional: con estas dos se exportan también los borradores y las visitas
-   $env:OLD_ADMIN_EMAIL = "admin@..."
-   $env:OLD_ADMIN_PASSWORD = "..."
    node scripts/migrar-desde-lovable.mjs export
    ```
+
+   Sin más variables solo se exporta lo publicado. Para incluir también los borradores y las visitas, el script necesita una sesión de admin del proyecto viejo:
+
+   - **Admin que entraba con Google** (el caso de este proyecto):
+     1. Inicia sesión en el sitio viejo de Lovable con Google.
+     2. Abre la consola del navegador (F12 → Console) y ejecuta:
+
+        ```js
+        copy(JSON.parse(localStorage.getItem("sb-dddqlypayckwzytnmzem-auth-token")).access_token)
+        ```
+
+     3. En PowerShell, antes del `export`, ejecuta `$env:OLD_ACCESS_TOKEN = Get-Clipboard`. El token dura alrededor de 1 hora y da acceso de admin: no lo pegues en ningún chat.
+
+   - **Admin con contraseña:** define `$env:OLD_ADMIN_EMAIL` y `$env:OLD_ADMIN_PASSWORD`.
 
    El resultado queda en `migracion/datos.json` y `migracion/imagenes/`. La carpeta no se versiona. Revísala antes de seguir.
 
@@ -178,7 +189,7 @@ Haz la migración en este orden:
 4. Borra las claves de la sesión y la carpeta exportada:
 
    ```powershell
-   Remove-Item Env:OLD_ADMIN_PASSWORD, Env:NEW_SUPABASE_SECRET_KEY -ErrorAction SilentlyContinue
+   Remove-Item Env:OLD_ACCESS_TOKEN, Env:OLD_ADMIN_PASSWORD, Env:NEW_SUPABASE_SECRET_KEY -ErrorAction SilentlyContinue
    Remove-Item -Recurse -Force migracion
    ```
 

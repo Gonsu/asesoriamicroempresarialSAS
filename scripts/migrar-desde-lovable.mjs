@@ -7,8 +7,10 @@
 //
 // Variables de entorno (ver docs/supabase.md):
 //   export: OLD_SUPABASE_URL, OLD_SUPABASE_KEY (clave anon/publishable del proyecto viejo)
-//           OLD_ADMIN_EMAIL y OLD_ADMIN_PASSWORD (opcionales: sin ellas solo se exporta lo
-//           publicado y no se exportan las visitas)
+//           Para exportar también borradores y visitas, una sesión de admin del proyecto
+//           viejo (opcional; sin ella solo se exporta lo publicado):
+//             OLD_ACCESS_TOKEN (access_token de una sesión iniciada con Google en el sitio
+//             viejo; dura ~1 hora), o bien OLD_ADMIN_EMAIL y OLD_ADMIN_PASSWORD
 //   import: NEW_SUPABASE_URL, NEW_SUPABASE_SECRET_KEY (secret/service_role del proyecto
 //           nuevo; nunca la pongas en .env ni en el frontend)
 
@@ -34,8 +36,11 @@ function env(name, { optional = false } = {}) {
   return value;
 }
 
-const client = (url, key) =>
-  createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+const client = (url, key, accessToken) =>
+  createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    ...(accessToken && { global: { headers: { Authorization: `Bearer ${accessToken}` } } }),
+  });
 
 // Lee todas las filas de una tabla en páginas de 1000 (límite por petición de Supabase).
 async function fetchAll(db, table) {
@@ -58,17 +63,23 @@ function oldPath(imageUrl) {
 
 async function exportData() {
   const url = env("OLD_SUPABASE_URL").replace(/\/+$/, "");
-  const db = client(url, env("OLD_SUPABASE_KEY"));
+  const key = env("OLD_SUPABASE_KEY");
+  const token = env("OLD_ACCESS_TOKEN", { optional: true });
   const email = env("OLD_ADMIN_EMAIL", { optional: true });
   const password = env("OLD_ADMIN_PASSWORD", { optional: true });
+  const db = client(url, key, token);
 
-  const isAdmin = Boolean(email && password);
-  if (isAdmin) {
+  const isAdmin = Boolean(token || (email && password));
+  if (token) {
+    const { data, error } = await db.auth.getUser(token);
+    if (error) throw new Error(`OLD_ACCESS_TOKEN no es válido o expiró: ${error.message}`);
+    console.log(`Sesión de ${data.user.email}: se exportan también borradores y visitas.`);
+  } else if (isAdmin) {
     const { error } = await db.auth.signInWithPassword({ email, password });
     if (error) throw new Error(`Login en el proyecto viejo: ${error.message}`);
     console.log(`Sesión iniciada como ${email}: se exportan también borradores y visitas.`);
   } else {
-    console.log("Sin OLD_ADMIN_EMAIL/OLD_ADMIN_PASSWORD: solo contenido publicado, sin visitas.");
+    console.log("Sin sesión de admin: solo contenido publicado, sin visitas.");
   }
 
   const data = {
