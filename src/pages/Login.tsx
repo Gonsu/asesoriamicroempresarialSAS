@@ -1,21 +1,27 @@
 import Seo from "@/components/Seo";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Lock } from "lucide-react";
+import { FieldError } from "@/components/QueryState";
+import { loginSchema, type LoginFormValues } from "@/features/auth/schema";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { user, isAdmin, loading: authLoading, signIn, signInWithGoogle, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "" } });
 
   // Con sesión de admin (contraseña o regreso de Google) se pasa directo al panel.
   useEffect(() => {
@@ -56,11 +62,8 @@ const Login = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async ({ email, password }: LoginFormValues) => {
     const { error } = await signIn(email, password);
-    setLoading(false);
 
     if (error) {
       toast({
@@ -104,31 +107,35 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div>
               <Label htmlFor="email">Correo electrónico</Label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 placeholder="admin@ame.com"
-                required
+                aria-invalid={!!errors.email}
+                aria-describedby="email-error"
+                {...register("email")}
               />
+              <FieldError id="email-error" message={errors.email?.message} />
             </div>
             <div>
               <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 placeholder="••••••••"
-                required
+                aria-invalid={!!errors.password}
+                aria-describedby="password-error"
+                {...register("password")}
               />
+              <FieldError id="password-error" message={errors.password?.message} />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Ingresando..." : "Iniciar sesión"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Ingresando..." : "Iniciar sesión"}
             </Button>
 
             <div className="relative my-4">

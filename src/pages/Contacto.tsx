@@ -1,18 +1,23 @@
 import Seo from "@/components/Seo";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Phone, Mail, MapPin, Facebook, Instagram, Send } from "lucide-react";
 import { mailtoUrl, site } from "@/config/site";
+import { FieldError } from "@/components/QueryState";
+import { contactMailto, contactSchema, type ContactFormValues } from "@/features/contact/schema";
 
 const Contacto = () => {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: { name: "", email: "", message: "" },
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const subject = encodeURIComponent(`Contacto desde la web — ${form.name}`);
-    const body = encodeURIComponent(
-      `Nombre: ${form.name}\nCorreo: ${form.email}\n\nMensaje:\n${form.message}`
-    );
-    window.location.href = `${mailtoUrl}?subject=${subject}&body=${body}`;
+  const onSubmit = (values: ContactFormValues) => {
+    window.location.href = contactMailto(mailtoUrl, values);
   };
 
   return (
@@ -121,39 +126,44 @@ const Contacto = () => {
           {/* Form */}
           <div>
             <h2 className="text-2xl font-semibold text-foreground mb-6">Envíanos un mensaje</h2>
-            <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg border border-border">
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 bg-card p-6 rounded-lg border border-border">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Nombre</label>
                 <input
                   id="name"
                   type="text"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  autoComplete="name"
+                  aria-invalid={!!errors.name}
+                  aria-describedby="name-error"
+                  {...register("name")}
                   className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
+                <FieldError id="name-error" message={errors.name?.message} />
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Correo</label>
                 <input
                   id="email"
                   type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  autoComplete="email"
+                  aria-invalid={!!errors.email}
+                  aria-describedby="email-error"
+                  {...register("email")}
                   className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
+                <FieldError id="email-error" message={errors.email?.message} />
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1.5">Mensaje</label>
                 <textarea
                   id="message"
-                  required
                   rows={5}
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  aria-invalid={!!errors.message}
+                  aria-describedby="message-error"
+                  {...register("message")}
                   className="w-full px-3 py-2.5 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
                 />
+                <FieldError id="message-error" message={errors.message?.message} />
               </div>
               <button
                 type="submit"
