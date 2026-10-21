@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveStorageImages } from "@/lib/storageImage";
+import { imageUrl } from "@/lib/storageImage";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Quote } from "lucide-react";
@@ -10,7 +10,7 @@ interface Testimonial {
   name: string;
   business_type: string | null;
   content: string;
-  image_url: string | null;
+  image_path: string | null;
 }
 
 const TestimonialsSection = () => {
@@ -21,11 +21,11 @@ const TestimonialsSection = () => {
   useEffect(() => {
     supabase
       .from("testimonials")
-      .select("id, name, business_type, content, image_url")
+      .select("id, name, business_type, content, image_path")
       .eq("is_published", true)
       .order("created_at", { ascending: false })
-      .then(async ({ data }) => {
-        if (data) setItems(await resolveStorageImages(data));
+      .then(({ data }) => {
+        if (data) setItems(data);
         setLoading(false);
       });
   }, []);
@@ -81,9 +81,9 @@ const TestimonialCard = ({ item }: { item: Testimonial }) => (
     <Quote size={24} className="text-primary/30" />
     <p className="text-foreground text-base leading-relaxed flex-1">"{item.content}"</p>
     <div className="flex items-center gap-3 pt-2 border-t border-border">
-      {item.image_url ? (
+      {item.image_path ? (
         <img
-          src={item.image_url}
+          src={imageUrl(item.image_path)}
           alt={item.name}
           className="w-12 h-12 rounded-full object-cover flex-shrink-0"
         />

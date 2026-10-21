@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveStorageImages } from "@/lib/storageImage";
+import { IMAGE_ACCEPT, deleteImage, imageUrl, uploadImage } from "@/lib/storageImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 import { Plus, Pencil, Trash2, Calendar } from "lucide-react";
 
 interface Meeting {
@@ -15,14 +14,13 @@ interface Meeting {
   title: string;
   description: string | null;
   meeting_date: string | null;
-  image_url: string | null;
+  image_path: string | null;
   type: string;
   published: boolean;
   created_at: string;
 }
 
 const MeetingsManager = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +44,7 @@ const MeetingsManager = () => {
       .from("meetings")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error && data) setMeetings(await resolveStorageImages(data));
+    if (!error && data) setMeetings(data);
     setLoading(false);
   };
 
@@ -57,19 +55,18 @@ const MeetingsManager = () => {
     setShowForm(false);
   };
 
-  const uploadImage = async (file: File): Promise<string | null> => {
-    const ext = file.name.split(".").pop();
-    const path = `${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("meeting-images").upload(path, file);
-    if (error) return null;
-    const { data } = supabase.storage.from("meeting-images").getPublicUrl(path);
-    return data.publicUrl;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let image_url: string | null = null;
-    if (imageFile) image_url = await uploadImage(imageFile);
+    let image_path: string | null = null;
+    if (imageFile) {
+      try {
+        image_path = await uploadImage(imageFile, "meetings");
+      } catch (err) {
+        toast({ title: "Error", description: (err as Error).message, variant: "destructive" });
+        return;
+      }
+    }
+    const previousImage = editingId ? meetings.find((m) => m.id === editingId)?.image_path : null;
 
     const payload = {
       title: form.title,
@@ -77,8 +74,7 @@ const MeetingsManager = () => {
       meeting_date: form.meeting_date || null,
       type: form.type,
       published: form.published,
-      ...(image_url && { image_url }),
-      ...(!editingId && { created_by: user?.id }),
+      ...(image_path && { image_path }),
     };
 
     let error;
@@ -89,8 +85,10 @@ const MeetingsManager = () => {
     }
 
     if (error) {
+      await deleteImage(image_path);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
+      if (image_path) await deleteImage(previousImage);
       toast({ title: editingId ? "Actualizado" : "Creado", description: "Operación exitosa." });
       resetForm();
       fetchMeetings();
@@ -109,9 +107,10 @@ const MeetingsManager = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("meetings").delete().eq("id", id);
+  const handleDelete = async (m: Meeting) => {
+    const { error } = await supabase.from("meetings").delete().eq("id", m.id);
     if (!error) {
+      await deleteImage(m.image_path);
       toast({ title: "Eliminado", description: "Registro eliminado." });
       fetchMeetings();
     }
@@ -155,7 +154,7 @@ const MeetingsManager = () => {
             </div>
             <div>
               <Label>Imagen</Label>
-              <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+              <Input type="file" accept={IMAGE_ACCEPT} onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
             </div>
           </div>
           <div>
@@ -183,8 +182,8 @@ const MeetingsManager = () => {
         <div className="space-y-3">
           {meetings.map((m) => (
             <div key={m.id} className="bg-card border border-border rounded-xl p-4 flex gap-4 items-start">
-              {m.image_url && (
-                <img src={m.image_url} alt={m.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
+              {m.image_path && (
+                <img src={imageUrl(m.image_path)} alt={m.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -213,7 +212,7 @@ const MeetingsManager = () => {
                 <Button variant="ghost" size="icon" onClick={() => handleEdit(m)}>
                   <Pencil size={14} />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(m.id)} className="text-destructive hover:text-destructive">
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(m)} className="text-destructive hover:text-destructive">
                   <Trash2 size={14} />
                 </Button>
               </div>

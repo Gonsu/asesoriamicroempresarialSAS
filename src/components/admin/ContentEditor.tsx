@@ -13,7 +13,7 @@ interface SectionContent {
   title: string | null;
   subtitle: string | null;
   description: string | null;
-  image_url: string | null;
+  image_path: string | null;
   extra_data: any;
 }
 

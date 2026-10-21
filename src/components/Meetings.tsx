@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveStorageImages } from "@/lib/storageImage";
+import { imageUrl } from "@/lib/storageImage";
 import { Calendar, Users } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -9,7 +9,7 @@ interface Meeting {
   title: string;
   description: string | null;
   meeting_date: string | null;
-  image_url: string | null;
+  image_path: string | null;
   type: string;
 }
 
@@ -22,10 +22,10 @@ const Meetings = () => {
     const fetchMeetings = async () => {
       const { data } = await supabase
         .from("meetings")
-        .select("id, title, description, meeting_date, image_url, type")
+        .select("id, title, description, meeting_date, image_path, type")
         .eq("published", true)
         .order("meeting_date", { ascending: false });
-      if (data) setMeetings(await resolveStorageImages(data));
+      if (data) setMeetings(data);
       setLoading(false);
     };
     fetchMeetings();
@@ -65,8 +65,8 @@ const Meetings = () => {
               key={m.id}
               className="bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow"
             >
-              {m.image_url && (
-                <img src={m.image_url} alt={m.title} className="w-full h-44 object-cover" />
+              {m.image_path && (
+                <img src={imageUrl(m.image_path)} alt={m.title} className="w-full h-44 object-cover" />
               )}
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-2">

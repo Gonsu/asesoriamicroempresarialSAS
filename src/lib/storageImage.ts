@@ -1,33 +1,57 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const BUCKET = "meeting-images";
-const cache = new Map<string, string>();
-
 /**
- * The meeting-images bucket is private: stored URLs (or paths) are converted
- * into short-lived signed URLs before being rendered.
+ * Imágenes del sitio en el bucket público `site-images`. En la base de datos se guarda solo
+ * la ruta del archivo (p. ej. `meetings/<uuid>.webp`); la URL pública se arma al mostrarla.
+ * Los límites coinciden con los del bucket (ver la migración del esquema inicial).
  */
-export async function resolveStorageImage(url?: string | null): Promise<string | null> {
-  if (!url) return null;
-  if (url.startsWith("http") && !url.includes(`/${BUCKET}/`)) return url;
+const BUCKET = "site-images";
 
-  const raw = url.includes(`/${BUCKET}/`) ? url.split(`/${BUCKET}/`).pop()! : url;
-  const path = decodeURIComponent(raw.split("?")[0]);
+export const IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const IMAGE_ACCEPT = IMAGE_TYPES.join(",");
+
+const EXTENSIONS: Record<(typeof IMAGE_TYPES)[number], string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+export type ImageFolder = "meetings" | "testimonials" | "content";
+
+export function imageUrl(path: string | null | undefined): string | null {
   if (!path) return null;
-
-  const cached = cache.get(path);
-  if (cached) return cached;
-
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600);
-  if (!data?.signedUrl) return null;
-  cache.set(path, data.signedUrl);
-  return data.signedUrl;
+  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-export async function resolveStorageImages<T extends { image_url: string | null }>(
-  rows: T[]
-): Promise<T[]> {
-  return Promise.all(
-    rows.map(async (row) => ({ ...row, image_url: await resolveStorageImage(row.image_url) }))
-  );
+/** Devuelve un mensaje de error si el archivo no cumple los límites del bucket. */
+export function validateImage(file: File): string | null {
+  if (!(IMAGE_TYPES as readonly string[]).includes(file.type)) {
+    return "Formato no permitido. Usa JPG, PNG o WebP.";
+  }
+  if (file.size > IMAGE_MAX_BYTES) {
+    return "La imagen supera los 2 MB.";
+  }
+  return null;
+}
+
+/** Sube la imagen y devuelve su ruta en el bucket. Lanza un Error con mensaje para el usuario. */
+export async function uploadImage(file: File, folder: ImageFolder): Promise<string> {
+  const invalid = validateImage(file);
+  if (invalid) throw new Error(invalid);
+
+  const ext = EXTENSIONS[file.type as (typeof IMAGE_TYPES)[number]];
+  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, file, { contentType: file.type, cacheControl: "31536000" });
+  if (error) throw new Error(`No se pudo subir la imagen: ${error.message}`);
+  return path;
+}
+
+/** Borra una imagen del bucket. Un fallo solo deja un archivo huérfano, no se propaga. */
+export async function deleteImage(path: string | null | undefined): Promise<void> {
+  if (!path) return;
+  const { error } = await supabase.storage.from(BUCKET).remove([path]);
+  if (error) console.error("[storage] No se pudo borrar la imagen:", error.message);
 }
