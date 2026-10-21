@@ -4,6 +4,7 @@
 //
 //   node scripts/migrar-desde-lovable.mjs export   -> migracion/datos.json + migracion/imagenes/
 //   node scripts/migrar-desde-lovable.mjs import   -> sube imágenes y filas al proyecto nuevo
+//   node scripts/migrar-desde-lovable.mjs import --sin-secciones   -> igual, sin site_content
 //
 // Variables de entorno (ver docs/supabase.md):
 //   export: OLD_SUPABASE_URL, OLD_SUPABASE_KEY (clave anon/publishable del proyecto viejo)
@@ -198,9 +199,11 @@ async function importData() {
   }));
 
   // Por section_key: reemplaza las secciones de ejemplo del seed si ya existen.
+  // --sin-secciones las omite (p. ej. si son los textos por defecto y se usa el seed).
+  const sections = process.argv.includes("--sin-secciones") ? [] : data.site_content;
   await upsertRows(
     "site_content",
-    data.site_content,
+    sections,
     (r, image_path) => ({
       section_key: r.section_key,
       title: r.title,
