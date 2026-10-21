@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import RequireAdmin from "@/components/RequireAdmin";
+import { ConsentProvider } from "@/features/consent/ConsentProvider";
+import CookieBanner from "@/features/consent/components/CookieBanner";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index.tsx";
 
@@ -17,6 +19,8 @@ const Servicios = lazy(() => import("./pages/Servicios.tsx"));
 const Reuniones = lazy(() => import("./pages/Reuniones.tsx"));
 const Contacto = lazy(() => import("./pages/Contacto.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const PoliticaDatos = lazy(() => import("./pages/PoliticaDatos.tsx"));
+const Terminos = lazy(() => import("./pages/Terminos.tsx"));
 const Login = lazy(() => import("./pages/Login.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
 
@@ -42,6 +46,8 @@ const AppRoutes = () => {
             <Route path="/servicios" element={<Servicios />} />
             <Route path="/reuniones" element={<Reuniones />} />
             <Route path="/contacto" element={<Contacto />} />
+            <Route path="/politica-de-datos" element={<PoliticaDatos />} />
+            <Route path="/terminos" element={<Terminos />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route
@@ -66,9 +72,12 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <ConsentProvider>
+          <BrowserRouter>
+            <AppRoutes />
+            <CookieBanner />
+          </BrowserRouter>
+        </ConsentProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

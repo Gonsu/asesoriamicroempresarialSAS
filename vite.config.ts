@@ -13,6 +13,8 @@ const sitemapRoutes = [
   { path: "/servicios", changefreq: "monthly", priority: "0.9" },
   { path: "/reuniones", changefreq: "weekly", priority: "0.8" },
   { path: "/contacto", changefreq: "yearly", priority: "0.7" },
+  { path: "/politica-de-datos", changefreq: "yearly", priority: "0.3" },
+  { path: "/terminos", changefreq: "yearly", priority: "0.3" },
 ];
 
 // Inserta en index.html el título, las etiquetas description/og:/twitter: y el JSON-LD por
