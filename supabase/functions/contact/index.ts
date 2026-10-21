@@ -7,7 +7,8 @@
 //   ALLOWED_HOSTNAMES     hostnames que Turnstile debe informar, separados por coma
 // SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY las pone Supabase.
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+// Versión fija, la misma que usa el frontend (package.json).
+import { createClient } from "npm:@supabase/supabase-js@2.101.1";
 import { handleContact, type TurnstileResult } from "./handler.ts";
 
 const list = (name: string) =>

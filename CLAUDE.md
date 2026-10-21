@@ -42,14 +42,17 @@ npm run preview      # servir dist/ localmente
 npm run lint         # ESLint (falla también con avisos: --max-warnings 0)
 npm test             # Vitest (una pasada)
 npm run test:watch   # Vitest en modo watch
-npx tsc -p tsconfig.app.json --noEmit   # chequeo de tipos (vite build no lo hace)
+npm run typecheck    # tipos de la app, los tests y la config (vite build no los revisa)
+npm run preview      # sirve dist/ con las cabeceras de seguridad (prueba la CSP)
+npx supabase functions serve contact --env-file supabase/functions/.env   # Edge Function local
 npx supabase start   # Supabase local (requiere Docker Desktop); migraciones + seed
 npx supabase db reset                   # recrea la base local
 npx supabase gen types typescript --local --schema public > src/integrations/supabase/types.ts
 ```
 
 Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`):
-`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SITE_URL`. Si falta
+`VITE_SUPABASE_URL` (obligatoria en el build: la usa la CSP), `VITE_SUPABASE_PUBLISHABLE_KEY`,
+`VITE_SITE_URL` y `VITE_TURNSTILE_SITE_KEY` (vacía = clave de prueba de Turnstile). Si falta
 `VITE_SITE_URL`, `vite.config.ts` usa `http://localhost:8080` y avisa en el build.
 
 ## Estructura de carpetas
@@ -64,8 +67,10 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   └── migrar-desde-lovable.mjs   # exporta/importa datos e imágenes de Lovable Cloud
 ├── supabase/
 │   ├── config.toml            # config local de la CLI (auth, Google, registro desactivado)
-│   ├── migrations/            # esquema inicial (tablas, RLS, is_admin, bucket) y
-│   │                          # funciones de estadísticas (por período, sin bots)
+│   ├── migrations/            # esquema inicial (tablas, RLS, is_admin, bucket), funciones
+│   │                          # de estadísticas y seguridad (límites, contact_messages)
+│   ├── functions/contact/     # Edge Function del formulario (Turnstile, límite, CORS);
+│   │                          # handler.ts sin Deno, probado con vitest
 │   └── seed.sql               # textos reales de site_content (upsert) + ejemplos locales
 ├── src/
 │   ├── main.tsx / App.tsx     # arranque, rutas (React.lazy salvo Inicio), ErrorBoundary
@@ -77,19 +82,22 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   │   ├── content/           # textos de site_content (defaults.ts) y ContentEditor
 │   │   ├── meetings/          # MeetingsSection (pública) y MeetingsManager (admin)
 │   │   ├── testimonials/      # TestimonialsSection (pública) y TestimonialsManager
-│   │   ├── auth/ contact/     # esquemas de los formularios de login y contacto
+│   │   ├── contact/           # formulario (Turnstile), mapa al clic y ContactMessagesManager
+│   │   ├── auth/              # esquema del formulario de login
 │   │   └── schemas.test.ts    # tests de los esquemas de formularios
 │   ├── components/            # secciones públicas (Header, Footer, TopBar, HeroSimple,
 │   │   │                      # StatsBand, CTA, Seo, ...), ErrorBoundary, QueryState
-│   │   │                      # (error/vacío/skeleton/FieldError), ConfirmDeleteButton
+│   │   │                      # (error/vacío/skeleton/FieldError), ConfirmDeleteButton,
+│   │   │                      # RequireAdmin (ruta protegida + inactividad)
 │   │   └── ui/                # componentes shadcn/ui en uso
 │   ├── config/site.ts         # datos de la empresa, URL del sitio y JSON-LD
+│   ├── config/securityHeaders.ts  # CSP y cabeceras (dist/_headers y vite preview)
 │   ├── contexts/              # AuthContext (proveedor), auth-context y useAuth
-│   ├── hooks/                 # use-toast, useNotify, useScrollReveal, useScrollDirection
+│   ├── hooks/                 # use-toast, useNotify, useIdleLogout, useScrollReveal, ...
 │   ├── integrations/
 │   │   └── supabase/          # client.ts y types.ts (tipos generados de la BD)
 │   ├── lib/                   # utils.ts (cn), storageImage.ts (subir/borrar/URL de imágenes),
-│   │                          # imageField.ts (validación zod de imágenes)
+│   │                          # imageField.ts (validación zod de imágenes), zod.ts (z sin JIT)
 │   ├── assets/                # imágenes importadas por Vite
 │   └── test/                  # setup de Vitest
 ├── vite.config.ts / vitest.config.ts / tailwind.config.ts / eslint.config.js
@@ -114,19 +122,24 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 - Estadísticas: funciones SQL `security invoker` (`page_view_stats`, `page_view_totals`,
   `meeting_stats`) por período en `America/Bogota`; excluyen bots con `is_bot_user_agent`,
   cuya regex debe coincidir con `features/analytics/bots.ts` (lo comprueba un test).
+- `contact_messages`: sin INSERT por la API; solo la Edge Function `contact` (clave de servicio,
+  tras Turnstile y límite por IP). Admins leen, marcan `is_read` y borran.
+- Límites de abuso en `private.rate_limits` (claves con hash y sal): `page_views` 60/h por
+  visitante y 300/h por IP (trigger que descarta en silencio); contacto 5/h por IP.
+- Nada de HTML sin escapar: ESLint prohíbe `dangerouslySetInnerHTML` e `innerHTML`; zod se
+  importa de `@/lib/zod` (sin JIT, la CSP no permite eval).
 - `site_content`: textos por defecto en `features/content/defaults.ts`, iguales a `seed.sql`
   (lo comprueba un test). `extra_data.highlight` = palabra resaltada del título del hero.
 
 ## Problemas conocidos
 
-Pendientes (estado al terminar el paso 3, 2026-10-21):
+Pendientes (estado al terminar el paso 4, 2026-10-21):
 
-- `npm audit`: 14 vulnerabilidades (2 críticas, 6 altas), todas en vite, vitest, tailwindcss y
-  react-router-dom o sus dependencias. Corregirlas exige subir de versión mayor
-  (vite 8, vitest 5, tailwindcss 4, react-router-dom 7).
+- `npm audit`: 5 altas, todas de `braces` vía tailwindcss 3 (solo en el build; sin versión
+  corregida). Se resuelve con tailwindcss 4.
 - `cucuta-real.png` (670 KB) se sirve sin optimizar.
-- El formulario de contacto usa `mailto:`, así que no envía nada por sí mismo.
 - Login con Google: falta configurarlo en producción (`docs/supabase.md`, sección 5).
+- Turnstile usa la clave de prueba hasta tener la site key real.
 
 Resueltos del diagnóstico inicial (2026-10-20): dependencia de Lovable, lockfiles duplicados,
 `.env` versionado, `site_content` sin uso, estadísticas calculadas en el navegador con un

@@ -238,3 +238,45 @@ npx prettier@3.3.3 --write src/integrations/supabase/types.ts
 - El panel usa las funciones de la migración `20261021000000_estadisticas.sql`. Agregan las cifras en SQL por un período de fechas locales de Cúcuta (`America/Bogota`), con las dos fechas incluidas.
 - Las visitas de bots y vistas previas de enlaces (WhatsApp, Facebook, Telegram, Googlebot…) se excluyen al consultar con `public.is_bot_user_agent`, así que el filtro también vale para las visitas antiguas.
 - El tracker del frontend tampoco inserta esas visitas. Su expresión regular (`src/features/analytics/bots.ts`) debe ser la misma que la de SQL; un test lo comprueba.
+
+## 10. Seguridad (paso 4)
+
+**Cabeceras HTTP.** `vite build` genera `dist/_headers` para Cloudflare Pages desde `src/config/securityHeaders.ts`:
+
+- Content-Security-Policy con el Supabase de `VITE_SUPABASE_URL`, Turnstile y Google Maps.
+- HSTS, `nosniff`, `X-Frame-Options`, Referrer-Policy, Permissions-Policy y COOP.
+
+`npm run preview` aplica las mismas cabeceras, así que es la forma de probar la CSP en local. El build falla si falta `VITE_SUPABASE_URL`.
+
+**Límites de abuso.** Están en la migración `20261022000000_seguridad.sql`:
+
+- `page_views`: 60 visitas por hora por `visitor_id` y 300 por hora por IP. Las de más se descartan sin error.
+- Formulario de contacto: 5 mensajes por hora por IP.
+- La IP sale de `cf-connecting-ip` o `x-real-ip`, nunca del `x-forwarded-for` que manda el cliente. Se guarda como SHA-256 con una sal secreta, en `private.rate_limits`.
+
+**Formulario de contacto.**
+
+- La tabla `contact_messages` no admite inserciones por la API: solo la Edge Function `contact`, con la clave de servicio.
+- La función verifica el token de Turnstile (hostname y acción), aplica el límite por IP y solo responde a los orígenes de `ALLOWED_ORIGINS`.
+
+En local:
+
+```bash
+cp supabase/functions/.env.example supabase/functions/.env   # claves de prueba de Turnstile
+npx supabase functions serve contact --env-file supabase/functions/.env
+```
+
+En producción:
+
+```bash
+npx supabase secrets set TURNSTILE_SECRET_KEY=<secret key de Turnstile> \
+  ALLOWED_ORIGINS=https://asesoriamicroempresarialsas.pages.dev \
+  ALLOWED_HOSTNAMES=asesoriamicroempresarialsas.pages.dev
+npx supabase functions deploy contact
+```
+
+La site key de Turnstile (pública) va en `VITE_TURNSTILE_SITE_KEY`, en `.env` y en las variables de Cloudflare Pages. Sin ella se usa la clave de prueba, que en producción no funciona: la secret real rechaza sus tokens.
+
+**Contraseñas.** `config.toml` exige 12 caracteres con mayúsculas, minúsculas y números, pero solo en local. En producción se configura en **Authentication → Providers → Email**.
+
+**Sesión del panel.** Se cierra tras 30 minutos sin actividad (`src/hooks/useIdleLogout.ts`). Es una medida del frontend: el cierre por inactividad del servidor es del plan Pro.
