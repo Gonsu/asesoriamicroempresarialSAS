@@ -4,7 +4,6 @@ import Seo from "@/components/Seo";
 const NotFound = () => {
   const location = useLocation();
 
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <Seo
