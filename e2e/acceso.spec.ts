@@ -45,7 +45,7 @@ test.describe("acceso al panel", () => {
     await expect(page.getByRole("heading", { name: /Panel Admin/ })).toBeVisible();
     await page.getByRole("button", { name: "Salir" }).click();
     await expect(page).toHaveURL("/");
-    expect(await page.evaluate(() => localStorage.getItem("ame_admin_last_activity"))).toBeNull();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem("ame_admin_last_activity"))).toBeNull();
     await page.goto("/admin");
     await expect(page).toHaveURL("/login");
   });

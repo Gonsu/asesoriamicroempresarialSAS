@@ -109,9 +109,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    // La marca se borra antes de la llamada de red: aunque esta falle, no queda una sesión
+    // "activa" para la próxima vez.
+    clearAdminActivity();
     const supabase = await getSupabase();
     await supabase.auth.signOut();
-    clearAdminActivity();
     setIsAdmin(false);
   };
 
