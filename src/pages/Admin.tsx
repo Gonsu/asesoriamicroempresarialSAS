@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote } from "lucide-react";
-import AdminDashboard from "@/features/analytics/components/AdminDashboard";
-import MeetingsManager from "@/features/meetings/components/MeetingsManager";
-import ContentEditor from "@/features/content/components/ContentEditor";
-import TestimonialsManager from "@/features/testimonials/components/TestimonialsManager";
+import { ListSkeleton } from "@/components/QueryState";
+
+// Cada pestaña es un chunk aparte: solo se descarga al abrirla.
+const AdminDashboard = lazy(() => import("@/features/analytics/components/AdminDashboard"));
+const MeetingsManager = lazy(() => import("@/features/meetings/components/MeetingsManager"));
+const TestimonialsManager = lazy(() => import("@/features/testimonials/components/TestimonialsManager"));
+const ContentEditor = lazy(() => import("@/features/content/components/ContentEditor"));
 
 const tabs = [
   { id: "dashboard", label: "Estadísticas", icon: BarChart3 },
@@ -84,10 +87,12 @@ const Admin = () => {
       </div>
 
       <main className="max-w-4xl mx-auto p-6">
-        {activeTab === "dashboard" && <AdminDashboard />}
-        {activeTab === "meetings" && <MeetingsManager />}
-        {activeTab === "testimonials" && <TestimonialsManager />}
-        {activeTab === "content" && <ContentEditor />}
+        <Suspense fallback={<ListSkeleton />}>
+          {activeTab === "dashboard" && <AdminDashboard />}
+          {activeTab === "meetings" && <MeetingsManager />}
+          {activeTab === "testimonials" && <TestimonialsManager />}
+          {activeTab === "content" && <ContentEditor />}
+        </Suspense>
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import TopBar from "@/components/TopBar";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,7 +26,10 @@ const Layout = () => {
       <TopBar />
       <Header />
       <main className="flex-1">
-        <Outlet />
+        {/* Las páginas se cargan en diferido; mientras, se mantienen el encabezado y el pie. */}
+        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
       <FloatingWhatsApp />

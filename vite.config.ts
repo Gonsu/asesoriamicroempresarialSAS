@@ -88,5 +88,16 @@ export default defineConfig(({ command, mode }) => {
       },
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // Librerías que cambian poco en chunks propios: siguen en caché entre despliegues.
+          manualChunks: {
+            react: ["react", "react-dom", "react-router-dom"],
+            supabase: ["@supabase/supabase-js"],
+          },
+        },
+      },
+    },
   };
 });
