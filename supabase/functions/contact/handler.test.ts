@@ -2,7 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import { clientIp, handleContact, parseContactBody, type ContactDeps } from "./handler";
 
 const ORIGIN = "https://ame.pages.dev";
-const valid = { name: "Ana", email: "ana@correo.co", message: "Quiero una asesoría financiera.", token: "tok" };
+const valid = {
+  name: "Ana",
+  email: "ana@correo.co",
+  message: "Quiero una asesoría financiera.",
+  token: "tok",
+  privacyAccepted: true,
+  privacyVersion: "2026-10-22",
+};
 
 function deps(overrides: Partial<ContactDeps> = {}): ContactDeps {
   return {
@@ -30,7 +37,13 @@ describe("handleContact", () => {
     expect(res.headers.get("access-control-allow-origin")).toBe(ORIGIN);
     expect(d.hitRateLimit).toHaveBeenCalledWith("203.0.113.5");
     expect(d.verifyTurnstile).toHaveBeenCalledWith("tok", "203.0.113.5");
-    expect(d.saveMessage).toHaveBeenCalledWith({ name: "Ana", email: "ana@correo.co", message: valid.message });
+    expect(d.saveMessage).toHaveBeenCalledWith({
+      name: "Ana",
+      email: "ana@correo.co",
+      message: valid.message,
+      privacy_accepted_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      privacy_version: "2026-10-22",
+    });
   });
 
   it("rechaza orígenes no permitidos sin cabeceras CORS", async () => {
@@ -84,6 +97,29 @@ describe("handleContact", () => {
     const r3 = await handleContact(request(valid), deps({ saveMessage: down }));
     expect([r1.status, r2.status, r3.status]).toEqual([503, 502, 500]);
     for (const r of [r1, r2, r3]) expect(await r.text()).not.toContain("detalle interno");
+  });
+});
+
+describe("autorización de datos", () => {
+  it("rechaza el envío sin la casilla marcada o con una versión inválida", async () => {
+    for (const body of [
+      { ...valid, privacyAccepted: false },
+      { ...valid, privacyAccepted: "true" },
+      { ...valid, privacyAccepted: undefined },
+      { ...valid, privacyVersion: "v1" },
+    ]) {
+      const d = deps();
+      const res = await handleContact(request(body), d);
+      expect(res.status).toBe(400);
+      expect(d.verifyTurnstile).not.toHaveBeenCalled();
+      expect(d.saveMessage).not.toHaveBeenCalled();
+    }
+  });
+
+  it("la hora de aceptación la pone el servidor", () => {
+    const now = new Date("2026-10-22T15:00:00Z");
+    const parsed = parseContactBody({ ...valid, privacy_accepted_at: "1999-01-01T00:00:00Z" }, now);
+    expect(parsed).toMatchObject({ ok: true, message: { privacy_accepted_at: "2026-10-22T15:00:00.000Z" } });
   });
 });
 

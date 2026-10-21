@@ -5,6 +5,9 @@ export interface ContactMessage {
   name: string;
   email: string;
   message: string;
+  /** Prueba de la autorización (Decreto 1377): cuándo y qué versión de la política aceptó. */
+  privacy_accepted_at: string;
+  privacy_version: string;
 }
 
 export interface ContactDeps {
@@ -31,15 +34,24 @@ export const TURNSTILE_ACTION = "contact";
 const MAX_BODY_BYTES = 10_000;
 // Mismos límites que los CHECK de public.contact_messages y el esquema del formulario.
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+// Versión de la política = su fecha (mismo formato que el CHECK de privacy_version).
+const PRIVACY_VERSION_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Valida y normaliza el cuerpo. Devuelve el mensaje o el texto del error. */
 export function parseContactBody(
   body: unknown,
+  now: Date = new Date(),
 ): { ok: true; message: ContactMessage; token: string } | { ok: false; error: string } {
   if (!body || typeof body !== "object") return { ok: false, error: "Solicitud no válida." };
-  const { name, email, message, token } = body as Record<string, unknown>;
+  const { name, email, message, token, privacyAccepted, privacyVersion } = body as Record<string, unknown>;
   if (typeof name !== "string" || typeof email !== "string" || typeof message !== "string") {
     return { ok: false, error: "Faltan datos del formulario." };
+  }
+  if (privacyAccepted !== true) {
+    return { ok: false, error: "Debes autorizar el tratamiento de tus datos personales." };
+  }
+  if (typeof privacyVersion !== "string" || !PRIVACY_VERSION_PATTERN.test(privacyVersion)) {
+    return { ok: false, error: "Solicitud no válida." };
   }
   if (typeof token !== "string" || token.length === 0 || token.length > 2048) {
     return { ok: false, error: "Completa la verificación anti-spam." };
@@ -52,7 +64,12 @@ export function parseContactBody(
   if (clean.message.length < 10 || clean.message.length > 2000) {
     return { ok: false, error: "El mensaje debe tener entre 10 y 2000 caracteres." };
   }
-  return { ok: true, message: clean, token };
+  // La hora de la aceptación la pone el servidor, no el navegador.
+  return {
+    ok: true,
+    message: { ...clean, privacy_accepted_at: now.toISOString(), privacy_version: privacyVersion },
+    token,
+  };
 }
 
 /**
