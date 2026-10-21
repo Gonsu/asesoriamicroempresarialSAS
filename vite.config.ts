@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, type HtmlTagDescriptor, type Plugin } from "vite
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { buildMetaTags, buildOrganizationJsonLd, seoDefaults } from "./src/config/site.ts";
+import { buildHeadersFile, buildSecurityHeaders } from "./src/config/securityHeaders.ts";
 
 const DEFAULT_SITE_URL = "http://localhost:8080";
 
@@ -63,6 +64,24 @@ ${urls}
   };
 }
 
+// Cabeceras de seguridad: dist/_headers para Cloudflare Pages y las mismas en `vite preview`.
+// En `vite dev` no se aplican: el servidor de desarrollo usa scripts en línea (HMR).
+function securityHeaders(supabaseUrl: string): Plugin {
+  return {
+    name: "security-headers",
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: "_headers", source: buildHeadersFile(supabaseUrl) });
+    },
+    configurePreviewServer(server) {
+      const headers = buildSecurityHeaders(supabaseUrl);
+      server.middlewares.use((_req, res, next) => {
+        for (const [name, value] of Object.entries(headers)) res.setHeader(name, value);
+        next();
+      });
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
@@ -72,6 +91,11 @@ export default defineConfig(({ command, mode }) => {
   const siteUrl = (env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, "");
   // Expone el valor normalizado a import.meta.env y a %VITE_SITE_URL% en index.html.
   process.env.VITE_SITE_URL = siteUrl;
+  // La CSP solo permite este Supabase; sin él, el build no puede generar _headers.
+  const supabaseUrl = env.VITE_SUPABASE_URL;
+  if (!supabaseUrl && command === "build") {
+    throw new Error("[vite] Falta VITE_SUPABASE_URL: se necesita para la Content-Security-Policy.");
+  }
 
   return {
     server: {
@@ -81,7 +105,7 @@ export default defineConfig(({ command, mode }) => {
         overlay: false,
       },
     },
-    plugins: [react(), seoFiles(siteUrl)],
+    plugins: [react(), seoFiles(siteUrl), ...(supabaseUrl ? [securityHeaders(supabaseUrl)] : [])],
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "./src"),
