@@ -15,7 +15,9 @@
   "include": [
     "src",
     "supabase/functions/contact/handler.ts",
-    "supabase/functions/contact/handler.test.ts"
+    "supabase/functions/contact/handler.test.ts",
+    "e2e",
+    "playwright.config.ts"
   ],
   "exclude": []
 }

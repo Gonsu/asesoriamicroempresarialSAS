@@ -48,6 +48,11 @@ export default tseslint.config(
     },
   },
   {
+    // Los fixtures de Playwright reciben una función `use` que no es un hook de React.
+    files: ["e2e/**/*.ts"],
+    rules: { "react-hooks/rules-of-hooks": "off" },
+  },
+  {
     // Los tests pueden limpiar el DOM con innerHTML.
     files: ["**/*.test.{ts,tsx}"],
     rules: { "no-restricted-syntax": "off" },

@@ -1,0 +1,127 @@
+# CI de AME S.A.S. Sin secretos: Supabase local (claves de desarrollo que imprime
+# `supabase status`) y las claves de prueba públicas de Cloudflare Turnstile.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Una corrida nueva de la misma rama cancela la anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  # Servicios de Supabase que las pruebas no usan (arranque más rápido).
+  SUPABASE_EXCLUDE: realtime,imgproxy,mailpit,postgres-meta,studio,logflare,vector,supavisor
+
+jobs:
+  verificar:
+    name: Verificar (gitleaks, tipos, lint, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks revisa todo el historial
+
+      - name: gitleaks (claves en el historial)
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo --entrypoint sh ghcr.io/gitleaks/gitleaks:v8.28.0 -c \
+            "git config --global --add safe.directory /repo && gitleaks git /repo --log-opts='--all' --redact --no-banner --verbose"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - name: Build
+        run: npm run build
+        env:
+          # Solo para que el build genere la CSP; no apunta a ningún proyecto real.
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: ci-sin-clave
+          VITE_SITE_URL: http://localhost:4173
+          VITE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+
+  e2e:
+    name: E2E (Playwright + Supabase local)
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Supabase local (migraciones + seed)
+        run: npx supabase start -x "$SUPABASE_EXCLUDE"
+
+      - name: Navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas E2E
+        # Escribe .env.production.local desde `supabase status`, hace el build y corre Playwright,
+        # que levanta `vite preview` y la Edge Function con las claves de prueba de Turnstile.
+        run: npm run test:e2e
+
+      - name: Informe de Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  lighthouse:
+    name: Lighthouse (solo main, no bloquea)
+    if: github.ref == 'refs/heads/main'
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Supabase local
+        run: npx supabase start -x "$SUPABASE_EXCLUDE,edge-runtime"
+
+      - name: Build contra Supabase local
+        run: node scripts/e2e-env.mjs && npm run build
+
+      - name: Lighthouse
+        run: |
+          npx vite preview --port 4173 --strictPort &
+          for i in $(seq 1 30); do curl -sf http://localhost:4173/ > /dev/null && break; sleep 1; done
+          node scripts/lighthouse.mjs
+
+      - name: Publicar cifras
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: lighthouse/
+          retention-days: 30

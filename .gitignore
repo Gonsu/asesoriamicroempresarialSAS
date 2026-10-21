@@ -34,3 +34,8 @@ migracion/
 # Supabase local
 supabase/.temp
 supabase/.branches
+
+# Resultados de pruebas E2E y Lighthouse
+playwright-report/
+test-results/
+lighthouse/

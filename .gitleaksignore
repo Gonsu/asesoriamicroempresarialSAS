@@ -1,0 +1,6 @@
+# Hallazgos de gitleaks revisados y aceptados (uno por línea, por huella).
+#
+# Clave anon (pública) del proyecto Supabase antiguo de Lovable Cloud (ref dddqlypayckwzytnmzem),
+# en el .env que el bot de Lovable versionó el 2026-04-03. No es una service_role: el sitio viejo
+# la publicaba en su JS. Deja de servir al pausar o borrar ese proyecto (docs/lanzamiento.md, paso 9).
+938621f48c3d06ec14beba9d6efadc15f68564d8:.env:jwt:2

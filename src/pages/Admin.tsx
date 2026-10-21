@@ -29,9 +29,10 @@ const Admin = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
 
+  // Primero se sale del panel: si se cerrara la sesión antes, RequireAdmin redirigiría a /login.
   const handleSignOut = async () => {
+    navigate("/", { replace: true });
     await signOut();
-    navigate("/");
   };
 
   return (

@@ -43,6 +43,9 @@ npm run preview      # servir dist/ localmente
 npm run lint         # ESLint (falla también con avisos: --max-warnings 0)
 npm test             # Vitest (una pasada)
 npm run test:watch   # Vitest en modo watch
+npm run test:e2e     # E2E con Playwright: requiere `npx supabase start`; escribe .env.production.local,
+                     # hace el build y levanta vite preview y la Edge Function (PW_CHANNEL=msedge en Windows)
+npm run test:e2e:ui  # Playwright en modo interactivo
 npm run typecheck    # tipos de la app, los tests y la config (vite build no los revisa)
 npm run preview      # sirve dist/ como Pages: cabeceras, HTML por ruta y 404 (prueba la CSP)
 npm run images       # regenera src/assets/*.webp y public/og-image.jpg desde assets-originales/
@@ -64,12 +67,16 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 ├── index.html                 # HTML base y meta OG/Twitter (%VITE_SITE_URL%)
 ├── public/                    # favicon y og-image.png (se copian tal cual a dist/);
 │                              # robots.txt y sitemap.xml los genera vite.config.ts
+├── .github/workflows/ci.yml   # CI: gitleaks, tipos, lint, tests, build, E2E y Lighthouse (main)
+├── e2e/                       # pruebas E2E (Playwright) contra el build y Supabase local
 ├── docs/supabase.md           # backend: local, producción, admin, Google, migración
 ├── docs/lanzamiento.md        # pasos pendientes de producción, en orden
 ├── assets-originales/         # fotos y logo originales (no entran al build)
 ├── scripts/
 │   ├── migrar-desde-lovable.mjs   # exporta/importa datos e imágenes de Lovable Cloud
-│   └── optimizar-imagenes.mjs     # WebP por anchos y og-image.jpg (sharp)
+│   ├── optimizar-imagenes.mjs     # WebP por anchos y og-image.jpg (sharp)
+│   ├── e2e-env.mjs                # .env.production.local desde `supabase status` (claves locales)
+│   └── lighthouse.mjs             # Lighthouse móvil y escritorio con resumen en Markdown
 ├── supabase/
 │   ├── config.toml            # config local de la CLI (auth, Google, registro desactivado)
 │   ├── migrations/            # esquema inicial (tablas, RLS, is_admin, bucket), funciones
@@ -109,10 +116,19 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   ├── lib/                   # utils.ts (cn), storageImage.ts (subir/borrar/URL de imágenes),
 │   │                          # imageField.ts (validación zod de imágenes), zod.ts (z sin JIT)
 │   ├── assets/                # WebP generados + images.ts (src, srcSet, width, height)
-│   └── test/                  # setup de Vitest
+│   └── test/                  # setup de Vitest (los tests unitarios van junto a su código)
 ├── vite.config.ts / vitest.config.ts / tailwind.config.ts / eslint.config.js
 └── tsconfig*.json             # TypeScript en modo estricto
 ```
+
+## CI (GitHub Actions)
+
+- `verificar` (cada push y PR): gitleaks sobre todo el historial (`.gitleaksignore` para hallazgos
+  revisados), typecheck, lint, Vitest y build.
+- `e2e` (cada push y PR): `supabase start` + `npm run test:e2e`; sube el informe si falla.
+- `lighthouse` (solo `main`, no bloquea): cifras como artefacto y en el resumen de la corrida.
+- Sin secretos: claves locales de `supabase status` y claves de prueba de Turnstile. La CLI de
+  Supabase va fija en devDependencies (`supabase`).
 
 ## Modelo de datos y seguridad (Supabase)
 

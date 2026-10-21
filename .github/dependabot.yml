@@ -34,3 +34,12 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: react-router-dom
         update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - dependencias
