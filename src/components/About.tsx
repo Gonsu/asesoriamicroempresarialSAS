@@ -1,6 +1,8 @@
 import { Home } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import aboutCucuta from "@/assets/cucuta-real.png";
+import { useSection } from "@/features/content/hooks";
+import { paragraphs } from "@/features/content/text";
 
 const badges = [
   { label: "Economía privada", cls: "bg-primary/15 text-[#1B6B3A] border border-primary/20" },
@@ -11,6 +13,8 @@ const badges = [
 
 const About = () => {
   const ref = useScrollReveal();
+  const content = useSection("about");
+  const texts = paragraphs(content.description);
   return (
     <section id="about" ref={ref} className="py-16 px-8 bg-card">
       <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -49,16 +53,20 @@ const About = () => {
         </div>
 
         <div>
-          <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
-            Quiénes somos
-          </span>
-          <h2 className="text-2xl font-semibold text-card-foreground mb-4">Asesoría Microempresarial S.A.S.</h2>
-          <p className="text-[13px] text-muted-foreground leading-relaxed mb-4">
-            Somos una sociedad comercial de economía privada, constituida conforme a las leyes de la República de Colombia. Nuestro equipo está conformado por profesionales con amplia trayectoria en el sector financiero y empresarial.
-          </p>
-          <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
-            Desde nuestra fundación hemos trabajado para democratizar el acceso a servicios de consultoría de calidad para pequeños y medianos empresarios de la región.
-          </p>
+          {content.subtitle && (
+            <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
+              {content.subtitle}
+            </span>
+          )}
+          <h2 className="text-2xl font-semibold text-card-foreground mb-4">{content.title}</h2>
+          {texts.map((p, i) => (
+            <p
+              key={i}
+              className={`text-[13px] text-muted-foreground leading-relaxed ${i === texts.length - 1 ? "mb-5" : "mb-4"}`}
+            >
+              {p}
+            </p>
+          ))}
           <div className="flex gap-2 flex-wrap">
             {badges.map((b) => (
               <span key={b.label} className={`px-3 py-1.5 rounded-full text-[11px] font-semibold ${b.cls}`}>

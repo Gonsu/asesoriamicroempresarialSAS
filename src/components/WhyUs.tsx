@@ -1,4 +1,6 @@
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useSection } from "@/features/content/hooks";
+import { paragraphs } from "@/features/content/text";
 
 const pillars = [
   {
@@ -31,21 +33,24 @@ const values = [
 
 const WhyUs = () => {
   const ref = useScrollReveal();
+  const content = useSection("whyus");
   return (
     <section id="empresa" ref={ref} className="bg-gradient-to-br from-secondary via-secondary to-[hsl(150,50%,95%)] py-16 px-8">
       <div className="text-center mb-10">
-        <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
-          ¿Por qué elegirnos?
-        </span>
-        <h3 className="text-2xl md:text-3xl font-semibold text-foreground">
-          Una empresa con propósito y valores sólidos
-        </h3>
+        {content.subtitle && (
+          <span className="inline-block bg-primary/10 text-primary text-[11px] tracking-[2px] font-semibold uppercase px-4 py-1.5 rounded-full mb-3">
+            {content.subtitle}
+          </span>
+        )}
+        <h3 className="text-2xl md:text-3xl font-semibold text-foreground">{content.title}</h3>
       </div>
       <div className="grid md:grid-cols-2 gap-8 items-start">
         <div>
-          <p className="text-[13px] text-muted-foreground leading-relaxed mb-6">
-            Fundada bajo los principios de servicio, respeto y compromiso, Asesoría Microempresarial S.A.S. trabaja para ser el aliado estratégico de la microempresa colombiana, impulsando el crecimiento económico y social en Norte de Santander.
-          </p>
+          {paragraphs(content.description).map((p, i) => (
+            <p key={i} className="text-[13px] text-muted-foreground leading-relaxed mb-6">
+              {p}
+            </p>
+          ))}
           <div className="flex flex-col gap-4">
             {pillars.map((p) => (
               <div key={p.letter} className="flex gap-4 items-start bg-card p-4 rounded-xl border border-border hover:border-primary/30 transition-colors shadow-sm">

@@ -3,11 +3,15 @@ import { Link } from "react-router-dom";
 import heroConsulting from "@/assets/hero-consulting.jpg";
 import heroEntrepreneur from "@/assets/hero-entrepreneur.jpg";
 import heroTeam from "@/assets/hero-team.jpg";
+import { useSection } from "@/features/content/hooks";
+import { splitHighlight } from "@/features/content/text";
 
 const slides = [heroConsulting, heroEntrepreneur, heroTeam];
 
 const HeroSimple = () => {
   const [current, setCurrent] = useState(0);
+  const content = useSection("hero");
+  const title = splitHighlight(content.title, content.highlight);
 
   useEffect(() => {
     const t = setInterval(() => setCurrent((c) => (c + 1) % slides.length), 5500);
@@ -29,17 +33,26 @@ const HeroSimple = () => {
 
       <div className="relative z-10 h-full flex items-center px-6 md:px-16 max-w-5xl">
         <div>
-          <span className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-4 border border-primary/30">
-            Asesoría Microempresarial desde 2016
-          </span>
-          <h1 className="text-3xl md:text-5xl font-semibold text-primary-foreground leading-tight mb-4 max-w-2xl">
-            Impulsamos el crecimiento de tu{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]">
-              microempresa
+          {content.subtitle && (
+            <span className="inline-block bg-primary/20 text-primary text-xs font-medium px-3 py-1 rounded-full mb-4 border border-primary/30">
+              {content.subtitle}
             </span>
+          )}
+          <h1 className="text-3xl md:text-5xl font-semibold text-primary-foreground leading-tight mb-4 max-w-2xl">
+            {title ? (
+              <>
+                {title.before}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5DCAA5] to-[#1B6B3A]">
+                  {title.match}
+                </span>
+                {title.after}
+              </>
+            ) : (
+              content.title
+            )}
           </h1>
           <p className="text-primary-foreground/80 text-base leading-relaxed mb-8 max-w-lg">
-            Servicios financieros, administrativos y de consultoría para pequeños empresarios en Norte de Santander.
+            {content.description}
           </p>
           <div className="flex gap-3 flex-wrap">
             <Link

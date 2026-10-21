@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import heroTeam from "@/assets/hero-team.jpg";
 import { mailtoUrl, site } from "@/config/site";
+import { useSection } from "@/features/content/hooks";
 
 const contacts = [
   { icon: Phone, text: site.phone.display, href: site.whatsappUrl },
@@ -12,20 +13,19 @@ const contacts = [
 
 const CTA = () => {
   const ref = useScrollReveal();
+  const content = useSection("cta");
   return (
     <section id="contact" ref={ref} className="relative overflow-hidden py-20 px-8 text-center">
       <img src={heroTeam} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
       <div className="absolute inset-0 bg-gradient-to-br from-[hsl(214,30%,15%)]/90 via-[hsl(210,30%,25%)]/85 to-[hsl(150,60%,26%)]/30" />
       <div className="relative z-10">
-        <span className="inline-block bg-primary/20 text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm border border-primary/30">
-          ¿Listo para empezar?
-        </span>
-        <h2 className="text-2xl md:text-3xl font-semibold text-primary-foreground mb-3">
-          Lleva tu empresa al siguiente nivel
-        </h2>
-        <p className="text-sm text-primary-foreground/65 mb-8 max-w-md mx-auto leading-relaxed">
-          Nuestro equipo de asesores está disponible para atenderte y diseñar una estrategia personalizada para tu negocio.
-        </p>
+        {content.subtitle && (
+          <span className="inline-block bg-primary/20 text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm border border-primary/30">
+            {content.subtitle}
+          </span>
+        )}
+        <h2 className="text-2xl md:text-3xl font-semibold text-primary-foreground mb-3">{content.title}</h2>
+        <p className="text-sm text-primary-foreground/65 mb-8 max-w-md mx-auto leading-relaxed">{content.description}</p>
         <div className="flex gap-4 justify-center flex-wrap">
           <a href={site.whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-primary to-[#1B6B3A] text-primary-foreground px-8 py-3.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
             Solicitar asesoría
