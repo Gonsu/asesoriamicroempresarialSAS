@@ -1,0 +1,212 @@
+# Backend Supabase
+
+El backend es un proyecto Supabase propio, en el plan gratuito:
+
+- Proyecto: `ASESORIA MICROEMPRESARIAL SAS`
+- Referencia: `xrnwnjcnqqbcqqudlzal`
+- Región: `us-west-2`
+
+El esquema completo está en `supabase/migrations/` y el contenido de ejemplo en `supabase/seed.sql`.
+
+Todos los comandos usan la CLI con `npx supabase`. No hace falta instalarla globalmente.
+
+## 1. Desarrollo local
+
+Requiere **Docker Desktop** abierto.
+
+```bash
+npx supabase start        # levanta Postgres, Auth, Storage y Studio; aplica migraciones y seed
+npx supabase status       # muestra URLs y claves locales
+npx supabase db reset     # borra la base local y vuelve a aplicar migraciones + seed
+npx supabase stop         # detiene los contenedores (conserva los datos)
+```
+
+Para que el frontend use la base local, crea `.env.development.local`. Este archivo no se versiona y en `npm run dev` tiene prioridad sobre `.env`:
+
+```
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_PUBLISHABLE_KEY=<PUBLISHABLE_KEY de `npx supabase status`>
+```
+
+Herramientas locales:
+
+- Studio, el panel de administración: <http://127.0.0.1:54323>
+- Mailpit, donde llegan los correos de invitación locales: <http://127.0.0.1:54324>
+
+## 2. Aplicar el esquema al proyecto de producción
+
+```bash
+npx supabase link --project-ref xrnwnjcnqqbcqqudlzal   # pide la contraseña de la base
+npx supabase db push                                   # aplica las migraciones pendientes
+npx supabase db push --include-seed                    # solo si quieres el contenido de ejemplo
+```
+
+Después, en `.env`, que se usa en el build y en Cloudflare Pages:
+
+```
+VITE_SUPABASE_URL=https://xrnwnjcnqqbcqqudlzal.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<Publishable key de Project Settings → API Keys>
+```
+
+## 3. Configuración de Auth en el panel
+
+`config.toml` solo afecta al entorno local. En producción, configura lo siguiente a mano en <https://supabase.com/dashboard/project/xrnwnjcnqqbcqqudlzal>.
+
+**Desactivar el registro público**
+
+1. Ve a **Authentication → Sign In / Providers**.
+2. Desactiva **Allow new users to sign up**.
+3. Deja **activado** el proveedor **Email**. Si lo desactivas, también se desactiva el login con contraseña.
+
+**Configurar las URLs**
+
+En **Authentication → URL Configuration**:
+
+- **Site URL:** `https://asesoriamicroempresarialsas.pages.dev`
+- **Redirect URLs:**
+  - `https://asesoriamicroempresarialsas.pages.dev/login`
+  - `http://localhost:8080/login`
+
+Si más adelante hay dominio propio, añade su `/login` y cambia el Site URL.
+
+## 4. Crear el primer administrador
+
+Con el registro desactivado, las cuentas solo las crea un administrador del proyecto Supabase. Hay dos pasos: crear el usuario y luego darle el rol `admin`.
+
+**Paso 1. Crear el usuario.** Elige una de estas dos formas.
+
+*Opción A: crear con contraseña (recomendada).* Ve a **Authentication → Users → Add user → Create new user**. Escribe el correo y una contraseña, y marca **Auto Confirm User**. La persona entra en `/login` con esa contraseña. Si su correo es de Google, también puede usar **Continuar con Google**: Supabase vincula la identidad de Google al usuario existente con el mismo correo verificado.
+
+*Opción B: invitar por correo.* Ve a **Authentication → Users → Add user → Send invitation**. El correo de invitación lleva a la Site URL con la sesión abierta. Después, la persona entra con Google.
+
+> El SMTP incluido en el plan gratuito solo entrega correos a los miembros del equipo de la organización en Supabase, con un límite de pocos correos por hora. Para invitar a otras direcciones, configura un SMTP propio en **Project Settings → Authentication → SMTP Settings**, por ejemplo con Resend o Brevo, que tienen planes gratuitos. Si no, usa la opción A.
+
+**Paso 2. Dar el rol de administrador.** En **SQL Editor**, ejecuta:
+
+```sql
+insert into public.user_roles (user_id, role)
+select id, 'admin' from auth.users where email = 'correo@ejemplo.com';
+```
+
+Para quitarle el rol más adelante:
+
+```sql
+delete from public.user_roles
+where role = 'admin'
+  and user_id = (select id from auth.users where email = 'correo@ejemplo.com');
+```
+
+**En local** se hace lo mismo desde Studio (<http://127.0.0.1:54323>). Los correos de invitación llegan a Mailpit.
+
+## 5. Login con Google
+
+El login con Google usa `supabase.auth.signInWithOAuth({ provider: "google" })` y vuelve a `/login`. Solo entran las cuentas que ya existen. Si una cuenta de Google no existe, Supabase responde `signup_disabled` y `/login` muestra el aviso «Esta cuenta de Google no está autorizada».
+
+### Google Cloud Console
+
+1. Entra a <https://console.cloud.google.com/>.
+2. Crea un proyecto, por ejemplo `ame-sas-web`.
+3. Ve a **Google Auth Platform → Branding** y completa:
+   - nombre de la app: `AME S.A.S.`;
+   - correo de asistencia;
+   - logo, opcional;
+   - dominio autorizado: `supabase.co`;
+   - más adelante, tu dominio propio.
+4. En **Audience**, elige **External**.
+   - Mientras esté en *Testing*, solo pueden entrar los correos añadidos en **Test users**.
+   - Cuando pases a *In production*, con solo los permisos `openid`, `email` y `profile`, Google no exige verificación.
+5. Ve a **Clients → Create client** y elige el tipo **Web application**.
+   - **Authorized JavaScript origins:**
+     - `https://asesoriamicroempresarialsas.pages.dev`
+     - `http://localhost:8080`
+   - **Authorized redirect URIs.** Es la URL de callback de Supabase, no la del sitio:
+     - `https://xrnwnjcnqqbcqqudlzal.supabase.co/auth/v1/callback`
+     - `http://127.0.0.1:54321/auth/v1/callback` (para pruebas locales)
+6. Copia el **Client ID** y el **Client secret**.
+
+### Supabase (producción)
+
+1. Ve a **Authentication → Sign In / Providers → Google**.
+2. Activa el proveedor.
+3. Pega el Client ID y el Client secret, y guarda.
+
+### Supabase (local)
+
+Crea `supabase/.env`. Este archivo no se versiona.
+
+```
+SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<client id>
+SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET=<client secret>
+```
+
+Después reinicia con `npx supabase stop && npx supabase start`.
+
+## 6. Migrar los datos desde Lovable Cloud
+
+El proyecto anterior (`dddqlypayckwzytnmzem`) lo administra Lovable Cloud. No da acceso directo a la base, así que `scripts/migrar-desde-lovable.mjs` copia los datos por la API.
+
+| Se migra | No se migra |
+| --- | --- |
+| Reuniones, testimonios, contenido del sitio, visitas (estas solo con login de admin) y las imágenes, que pasan del bucket viejo `meeting-images` al nuevo `site-images` con la ruta guardada en `image_path` | Los usuarios de Auth y sus roles: el admin se recrea (sección 4) |
+
+Haz la migración en este orden:
+
+1. Aplica el esquema al proyecto nuevo (sección 2).
+2. Exporta desde el proyecto viejo. Estos comandos son para PowerShell:
+
+   ```powershell
+   $env:OLD_SUPABASE_URL = "https://dddqlypayckwzytnmzem.supabase.co"
+   $env:OLD_SUPABASE_KEY = "<VITE_SUPABASE_PUBLISHABLE_KEY del .env actual>"
+   # Opcional: con estas dos se exportan también los borradores y las visitas
+   $env:OLD_ADMIN_EMAIL = "admin@..."
+   $env:OLD_ADMIN_PASSWORD = "..."
+   node scripts/migrar-desde-lovable.mjs export
+   ```
+
+   El resultado queda en `migracion/datos.json` y `migracion/imagenes/`. La carpeta no se versiona. Revísala antes de seguir.
+
+3. Importa en el proyecto nuevo:
+
+   ```powershell
+   $env:NEW_SUPABASE_URL = "https://xrnwnjcnqqbcqqudlzal.supabase.co"
+   $env:NEW_SUPABASE_SECRET_KEY = "<Secret key de Project Settings → API Keys>"
+   node scripts/migrar-desde-lovable.mjs import
+   ```
+
+   Puedes repetir la importación sin crear duplicados, porque conserva los `id` y las `section_key`. Las imágenes de más de 2 MB o en un formato distinto de JPG, PNG o WebP se omiten y aparecen al final como problemas. Súbelas de nuevo desde el panel de administración.
+
+4. Borra las claves de la sesión y la carpeta exportada:
+
+   ```powershell
+   Remove-Item Env:OLD_ADMIN_PASSWORD, Env:NEW_SUPABASE_SECRET_KEY -ErrorAction SilentlyContinue
+   Remove-Item -Recurse -Force migracion
+   ```
+
+**Importante:** la secret key salta RLS. Nunca la pongas en `.env`, en el frontend ni en el repositorio.
+
+## 7. Tipos de TypeScript
+
+Después de cambiar el esquema, regenera los tipos con la base local levantada:
+
+```bash
+npx supabase gen types typescript --local --schema public > src/integrations/supabase/types.ts
+npx prettier@3.3.3 --write src/integrations/supabase/types.ts
+```
+
+## 8. Modelo de seguridad
+
+- **RLS en todas las tablas.** `anon` además tiene privilegios de tabla mínimos:
+  - `SELECT` de las columnas públicas de `meetings` y `testimonials`. `created_by` no se expone, así que `select=*` como anon da error de permisos y hay que pedir columnas explícitas.
+  - `SELECT` de `site_content`.
+  - `INSERT` de `page`, `visitor_id` y `user_agent` en `page_views`.
+- **`public.is_admin()`:**
+  - `SECURITY DEFINER` con `search_path = ''`;
+  - sin parámetros, así que solo responde por el usuario de la sesión;
+  - no ejecutable por `anon`.
+- **Usuarios autenticados sin rol:** solo ven lo publicado y sus propias filas de `user_roles`. No hay escritura de `user_roles` desde la API.
+- **Bucket `site-images`:**
+  - público para descargar por URL;
+  - nadie puede listarlo sin ser admin;
+  - escritura solo para admins en `meetings/`, `testimonials/` y `content/`;
+  - límite de 2 MB y solo `image/jpeg`, `image/png` e `image/webp`.
+- **Registro público desactivado.** Las cuentas solo las crea un administrador del proyecto.

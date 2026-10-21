@@ -17,7 +17,8 @@ Incluye:
 
 - [Node.js](https://nodejs.org) 20 o superior (incluye npm). El proyecto usa **npm** como
   único gestor de paquetes.
-- Un proyecto de Supabase con las migraciones de `supabase/migrations/` aplicadas.
+- Un proyecto de Supabase con las migraciones de `supabase/migrations/` aplicadas, o
+  Supabase local con Docker Desktop. Ver [docs/supabase.md](docs/supabase.md).
 
 ## Ejecutar en local
 
@@ -72,6 +73,9 @@ src/components/       secciones del sitio; admin/ para el panel; ui/ para shadcn
 src/contexts/         sesión y rol de administrador (Supabase Auth)
 src/integrations/     cliente y tipos de Supabase
 supabase/migrations/  esquema de la base de datos y políticas RLS
+supabase/seed.sql     contenido de ejemplo para desarrollo local
+scripts/              migración de datos desde el proyecto anterior (Lovable Cloud)
+docs/supabase.md      guía del backend: local, producción, administradores, Google
 ```
 
 Para cambiar el teléfono, el correo, la dirección o las redes sociales, edita solo

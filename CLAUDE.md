@@ -15,8 +15,9 @@ mantenible, desplegable gratis y **sin depender de Lovable**.
 - **Hosting objetivo:** Cloudflare Pages (plan gratuito) en un subdominio `*.pages.dev`
   (aún no hay dominio propio). SPA: Cloudflare Pages sirve `index.html` como fallback si
   no existe `404.html` en `dist/`.
-- **Backend:** Supabase en plan gratuito, en la cuenta propia del usuario. Migraciones en
-  `supabase/migrations/`.
+- **Backend:** Supabase en plan gratuito, en la cuenta propia del usuario (proyecto
+  `xrnwnjcnqqbcqqudlzal`). Migraciones en `supabase/migrations/`, seed en `supabase/seed.sql`.
+  Guía completa (local, producción, admin, Google, migración desde Lovable): `docs/supabase.md`.
 - **Idioma:** interfaz y mensajes de commit en **español**.
 
 ## Reglas de trabajo
@@ -42,6 +43,9 @@ npm run lint         # ESLint
 npm test             # Vitest (una pasada)
 npm run test:watch   # Vitest en modo watch
 npx tsc -p tsconfig.app.json --noEmit   # chequeo de tipos (vite build no lo hace)
+npx supabase start   # Supabase local (requiere Docker Desktop); migraciones + seed
+npx supabase db reset                   # recrea la base local
+npx supabase gen types typescript --local --schema public > src/integrations/supabase/types.ts
 ```
 
 Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`):
@@ -55,10 +59,13 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 ├── index.html                 # HTML base y meta OG/Twitter (%VITE_SITE_URL%)
 ├── public/                    # favicon y og-image.png (se copian tal cual a dist/);
 │                              # robots.txt y sitemap.xml los genera vite.config.ts
+├── docs/supabase.md           # backend: local, producción, admin, Google, migración
+├── scripts/
+│   └── migrar-desde-lovable.mjs   # exporta/importa datos e imágenes de Lovable Cloud
 ├── supabase/
-│   ├── config.toml            # project_id del proyecto Supabase
-│   └── migrations/            # esquema SQL: user_roles, meetings, site_content,
-│                              # page_views, testimonials, bucket meeting-images, RLS
+│   ├── config.toml            # config local de la CLI (auth, Google, registro desactivado)
+│   ├── migrations/            # esquema SQL consolidado: tablas, RLS, is_admin, bucket
+│   └── seed.sql               # contenido de ejemplo (local)
 ├── src/
 │   ├── main.tsx / App.tsx     # arranque y rutas (Layout envuelve las páginas públicas)
 │   ├── pages/                 # Index, Empresa, Servicios, Reuniones, Contacto,
@@ -73,7 +80,7 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 │   ├── hooks/                 # use-toast, useScrollReveal, useScrollDirection
 │   ├── integrations/
 │   │   └── supabase/          # client.ts y types.ts (tipos generados de la BD)
-│   ├── lib/                   # utils.ts (cn), storageImage.ts (URLs firmadas)
+│   ├── lib/                   # utils.ts (cn), storageImage.ts (subir/borrar/URL de imágenes)
 │   ├── assets/                # imágenes importadas por Vite
 │   └── test/                  # setup de Vitest y test de ejemplo
 ├── vite.config.ts / vitest.config.ts / tailwind.config.ts / eslint.config.js
@@ -82,10 +89,16 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
 
 ## Modelo de datos y seguridad (Supabase)
 
-- Rol admin: tabla `user_roles` + función `SECURITY DEFINER public.is_admin(uuid)`.
+- Rol admin: tabla `user_roles` + función `SECURITY DEFINER public.is_admin()` (sin
+  parámetros, `search_path = ''`, no ejecutable por `anon`). Los roles se asignan por SQL.
 - Tablas con RLS: `meetings` y `testimonials` (lectura pública solo de publicados),
   `site_content` (lectura pública), `page_views` (insert anónimo validado, lectura admin).
-- Storage: bucket `meeting-images` (reuniones y `testimonials/`); escritura solo admin.
+- `anon` tiene privilegios de tabla mínimos: columnas públicas de `meetings`/`testimonials`
+  (sin `created_by`; `select=*` como anon falla, pedir columnas explícitas).
+- Storage: bucket público `site-images` (carpetas `meetings/`, `testimonials/`, `content/`),
+  2 MB, solo JPEG/PNG/WebP, escritura solo admin, no listable. En la BD se guarda la ruta
+  (`image_path`), nunca la URL; la URL se arma con `imageUrl()` de `storageImage.ts`.
+- Auth: registro público desactivado; login con contraseña o Google (solo cuentas existentes).
 - La autorización real está en RLS; las comprobaciones de `isAdmin` en el frontend son solo UX.
 
 ## Problemas conocidos (diagnóstico inicial, 2026-10-20)
@@ -113,11 +126,8 @@ Variables de entorno (archivo `.env`, no versionar; plantilla en `.env.example`)
   etiqueta y el nombre del archivo Excel, no filtra datos.
 - `PageViewTracker` está en `Layout` con `useEffect([])`: solo registra la primera página
   de la visita, no las navegaciones internas.
-- Bucket `meeting-images`: creado `public = true` (las URLs públicas saltan las políticas
-  RLS de SELECT), el código guarda `getPublicUrl`, `storageImage.ts` lo trata como privado y
-  firma URLs; las políticas usan `image_url LIKE '%' || name`.
-- Admin: borrar no pide confirmación ni elimina la imagen de Storage; errores de subida se
-  ignoran en silencio; `<Switch>` (button) anidado dentro de `<Button>` en TestimonialsManager.
+- Admin: borrar no pide confirmación; `<Switch>` (button) anidado dentro de `<Button>` en
+  TestimonialsManager.
 - Formulario de contacto con `mailto:`. `sitemap.xml` no incluye `/reuniones`.
 
 **Calidad de código**
