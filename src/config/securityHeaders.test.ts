@@ -21,10 +21,10 @@ describe("Content-Security-Policy", () => {
     expect(csp["frame-src"]).toEqual(["https://challenges.cloudflare.com", "https://www.google.com"]);
   });
 
-  it("no permite scripts ni estilos en línea, ni ser incrustado", () => {
-    const all = Object.values(csp).flat();
-    expect(all).not.toContain("'unsafe-inline'");
-    expect(all).not.toContain("'unsafe-eval'");
+  it("no permite scripts en línea ni eval, ni ser incrustado", () => {
+    expect(csp["script-src"]).not.toContain("'unsafe-inline'");
+    expect(Object.values(csp).flat()).not.toContain("'unsafe-eval'");
+    expect(csp["style-src"]).toEqual(["'self'", "'unsafe-inline'"]);
     expect(csp["frame-ancestors"]).toEqual(["'none'"]);
     expect(csp["object-src"]).toEqual(["'none'"]);
     expect(csp).toHaveProperty("upgrade-insecure-requests");

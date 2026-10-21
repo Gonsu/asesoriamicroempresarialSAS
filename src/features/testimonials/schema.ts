@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { optionalImageSchema } from "@/lib/imageField";
 
 // Mismos límites que los CHECK de la tabla testimonials.

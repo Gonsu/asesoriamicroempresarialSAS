@@ -40,6 +40,14 @@ export default tseslint.config(
     },
   },
   {
+    // zod siempre desde @/lib/zod, que desactiva el JIT (la CSP no permite eval).
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/zod.ts"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: [{ name: "zod", message: "Importa z desde @/lib/zod." }] }],
+    },
+  },
+  {
     // Los tests pueden limpiar el DOM con innerHTML.
     files: ["**/*.test.{ts,tsx}"],
     rules: { "no-restricted-syntax": "off" },

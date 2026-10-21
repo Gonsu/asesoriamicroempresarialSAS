@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 // Sin límites de longitud en la tabla site_content; estos evitan textos desproporcionados.
 export const sectionSchema = z.object({

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 // Mismos límites que los CHECK de public.contact_messages y la Edge Function `contact`.
 export const contactSchema = z.object({

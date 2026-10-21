@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { validateImage } from "@/lib/storageImage";
 
 /** Campo de imagen opcional de los formularios del panel: valida formato y tamaño al elegirla. */

@@ -12,7 +12,9 @@ export function buildContentSecurityPolicy(supabaseUrl: string): string {
     "default-src": ["'self'"],
     // Turnstile carga su script desde Cloudflare; no hay scripts en línea.
     "script-src": ["'self'", TURNSTILE_ORIGIN],
-    "style-src": ["'self'"],
+    // 'unsafe-inline' solo en estilos: el AlertDialog de Radix inyecta un <style> con medidas
+    // calculadas (bloqueo de scroll), así que no sirve un hash. Los scripts siguen sin él.
+    "style-src": ["'self'", "'unsafe-inline'"],
     // Imágenes del bucket site-images; data: para los SVG en línea de algunos componentes.
     "img-src": ["'self'", "data:", supabase],
     "font-src": ["'self'"],
