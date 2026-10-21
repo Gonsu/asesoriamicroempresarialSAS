@@ -1,36 +1,16 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { imageUrl } from "@/lib/storageImage";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Quote } from "lucide-react";
-
-interface Testimonial {
-  id: string;
-  name: string;
-  business_type: string | null;
-  content: string;
-  image_path: string | null;
-}
+import { usePublishedTestimonials } from "../hooks";
+import type { PublicTestimonial } from "../service";
 
 const TestimonialsSection = () => {
-  const [items, setItems] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: items = [], isPending: loading, isError } = usePublishedTestimonials();
   const ref = useScrollReveal();
 
-  useEffect(() => {
-    supabase
-      .from("testimonials")
-      .select("id, name, business_type, content, image_path")
-      .eq("is_published", true)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (data) setItems(data);
-        setLoading(false);
-      });
-  }, []);
-
-  if (!loading && items.length === 0) return null;
+  // Sección opcional: sin testimonios publicados (o si la consulta falla) no se muestra.
+  if (isError || (!loading && items.length === 0)) return null;
 
   return (
     <section ref={ref} className="px-6 md:px-10 py-14 bg-secondary/30">
@@ -76,7 +56,7 @@ const TestimonialsSection = () => {
   );
 };
 
-const TestimonialCard = ({ item }: { item: Testimonial }) => (
+const TestimonialCard = ({ item }: { item: PublicTestimonial }) => (
   <div className="bg-card shadow-md rounded-xl p-6 flex flex-col gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-border">
     <Quote size={24} className="text-primary/30" />
     <p className="text-foreground text-base leading-relaxed flex-1">"{item.content}"</p>

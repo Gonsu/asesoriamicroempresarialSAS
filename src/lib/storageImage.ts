@@ -49,9 +49,12 @@ export async function uploadImage(file: File, folder: ImageFolder): Promise<stri
   return path;
 }
 
-/** Borra una imagen del bucket. Un fallo solo deja un archivo huérfano, no se propaga. */
-export async function deleteImage(path: string | null | undefined): Promise<void> {
-  if (!path) return;
+/**
+ * Borra una imagen del bucket. Un fallo solo deja un archivo huérfano, así que no se lanza:
+ * devuelve un aviso para mostrar al usuario, o null si se borró (o no había imagen).
+ */
+export async function deleteImage(path: string | null | undefined): Promise<string | null> {
+  if (!path) return null;
   const { error } = await supabase.storage.from(BUCKET).remove([path]);
-  if (error) console.error("[storage] No se pudo borrar la imagen:", error.message);
+  return error ? `No se pudo borrar la imagen del almacenamiento (${error.message}); quedó como archivo sin usar.` : null;
 }

@@ -1,43 +1,12 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { imageUrl } from "@/lib/storageImage";
 import { Calendar, Users } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePublishedMeetings } from "../hooks";
 
-interface Meeting {
-  id: string;
-  title: string;
-  description: string | null;
-  meeting_date: string | null;
-  image_path: string | null;
-  type: string;
-}
-
-const Meetings = () => {
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [loading, setLoading] = useState(true);
+const MeetingsSection = () => {
+  const { data: meetings, isPending, isError } = usePublishedMeetings();
   const ref = useScrollReveal();
-
-  useEffect(() => {
-    const fetchMeetings = async () => {
-      const { data } = await supabase
-        .from("meetings")
-        .select("id, title, description, meeting_date, image_path, type")
-        .eq("published", true)
-        .order("meeting_date", { ascending: false });
-      if (data) setMeetings(data);
-      setLoading(false);
-    };
-    fetchMeetings();
-  }, []);
-
-  if (loading) {
-    return (
-      <section id="meetings" className="px-8 py-14 bg-secondary/50">
-        <div className="text-center text-muted-foreground">Cargando...</div>
-      </section>
-    );
-  }
 
   return (
     <section id="meetings" ref={ref} className="px-8 py-14 bg-secondary/50">
@@ -53,7 +22,25 @@ const Meetings = () => {
         </p>
       </div>
 
-      {meetings.length === 0 ? (
+      {isPending ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto" aria-busy="true" aria-label="Cargando">
+          {[1, 2].map((i) => (
+            <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
+              <Skeleton className="w-full h-44 rounded-none" />
+              <div className="p-5 space-y-3">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : isError ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <Calendar className="w-10 h-10 mx-auto mb-3 opacity-40" />
+          <p className="text-sm">No pudimos cargar las reuniones. Inténtalo de nuevo más tarde.</p>
+        </div>
+      ) : meetings.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Calendar className="w-10 h-10 mx-auto mb-3 opacity-40" />
           <p className="text-sm">Próximamente publicaremos nuestras reuniones y asesorías.</p>
@@ -99,4 +86,4 @@ const Meetings = () => {
   );
 };
 
-export default Meetings;
+export default MeetingsSection;

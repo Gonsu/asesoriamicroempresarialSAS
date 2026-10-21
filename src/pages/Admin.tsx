@@ -4,9 +4,9 @@ import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote } from "lucide-react";
 import AdminDashboard from "@/features/analytics/components/AdminDashboard";
-import MeetingsManager from "@/components/admin/MeetingsManager";
+import MeetingsManager from "@/features/meetings/components/MeetingsManager";
 import ContentEditor from "@/features/content/components/ContentEditor";
-import TestimonialsManager from "@/components/admin/TestimonialsManager";
+import TestimonialsManager from "@/features/testimonials/components/TestimonialsManager";
 
 const tabs = [
   { id: "dashboard", label: "Estadísticas", icon: BarChart3 },

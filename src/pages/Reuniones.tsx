@@ -1,6 +1,6 @@
 import Seo from "@/components/Seo";
-import Meetings from "@/components/Meetings";
-import TestimonialsSection from "@/components/TestimonialsSection";
+import MeetingsSection from "@/features/meetings/components/MeetingsSection";
+import TestimonialsSection from "@/features/testimonials/components/TestimonialsSection";
 
 const Reuniones = () => (
   <>
@@ -19,7 +19,7 @@ const Reuniones = () => (
         Conoce nuestras últimas actividades y el trabajo con nuestros clientes.
       </p>
     </section>
-    <Meetings />
+    <MeetingsSection />
     <TestimonialsSection />
   </>
 );
