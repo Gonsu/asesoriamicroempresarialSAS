@@ -27,3 +27,10 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Exportación de datos del proyecto viejo (scripts/migrar-desde-lovable.mjs)
+migracion/
+
+# Supabase local
+supabase/.temp
+supabase/.branches
