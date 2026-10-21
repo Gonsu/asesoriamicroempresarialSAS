@@ -7,11 +7,7 @@ import { legal } from "@/config/legal";
 /** Términos de uso del sitio. Borrador técnico: debe revisarlo un abogado. */
 const Terminos = () => (
   <>
-    <Seo
-      title="Términos de uso | AME S.A.S."
-      description="Condiciones de uso del sitio web de AME S.A.S. — Asesoría Microempresarial."
-      path="/terminos"
-    />
+    <Seo path="/terminos" />
     <LegalPage eyebrow="Información legal" title="Términos de uso" intro={<>Última actualización: <Fill value={legal.termsUpdated} />.</>}>
       <LegalSection id="aceptacion" title="1. Aceptación">
         <p>

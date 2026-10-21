@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft, BarChart3, Calendar, FileText, MessageSquareQuote, Inbox } from "lucide-react";
 import { ListSkeleton } from "@/components/QueryState";
+import Seo from "@/components/Seo";
 
 // Cada pestaña es un chunk aparte: solo se descarga al abrirla.
 const AdminDashboard = lazy(() => import("@/features/analytics/components/AdminDashboard"));
@@ -35,6 +36,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo path="/admin" />
       <header className="bg-card border-b border-border px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center font-bold text-primary-foreground">

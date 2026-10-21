@@ -5,13 +5,9 @@ import CompanyDetails from "@/components/CompanyDetails";
 
 const Empresa = () => (
   <>
-    <Seo
-      title="Quiénes somos: asesoría microempresarial desde 2016 | AME S.A.S."
-      description="Conoce a AME S.A.S.: misión, visión, valores y objetivos de nuestra asesoría microempresarial en Cúcuta, Norte de Santander, desde 2016."
-      path="/empresa"
-    />
+    <Seo path="/empresa" />
     <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
-      <span className="text-sm font-semibold text-primary">Nuestra empresa</span>
+      <span className="text-sm font-semibold text-[#5DCAA5]">Nuestra empresa</span>
       <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">
         Conócenos
       </h1>

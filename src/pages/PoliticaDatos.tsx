@@ -21,11 +21,7 @@ const PoliticaDatos = () => {
 
   return (
     <>
-      <Seo
-        title="Política de tratamiento de datos personales | AME S.A.S."
-        description="Cómo AME S.A.S. recolecta, usa, conserva y protege tus datos personales, y cómo ejercer tus derechos según la Ley 1581 de 2012."
-        path="/politica-de-datos"
-      />
+      <Seo path="/politica-de-datos" />
       <LegalPage
         eyebrow="Información legal"
         title="Política de tratamiento de datos personales"

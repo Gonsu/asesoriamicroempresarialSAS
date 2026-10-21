@@ -42,13 +42,9 @@ const Contacto = () => {
 
   return (
     <>
-      <Seo
-        title="Contacto y ubicación en Barrio Lleras, Cúcuta | AME S.A.S."
-        description={`Contáctanos: ${site.address.street}, ${site.address.neighborhood}, ${site.address.city}. WhatsApp +57 ${site.phone.display} y correo ${site.email}.`}
-        path="/contacto"
-      />
+      <Seo path="/contacto" />
       <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
-        <span className="text-sm font-semibold text-primary">Contáctenos</span>
+        <span className="text-sm font-semibold text-[#5DCAA5]">Contáctenos</span>
         <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">
           Hablemos de tu proyecto
         </h1>

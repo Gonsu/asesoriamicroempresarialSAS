@@ -1,37 +1,50 @@
-import { defineConfig, loadEnv, type HtmlTagDescriptor, type Plugin } from "vite";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { buildMetaTags, buildOrganizationJsonLd, seoDefaults } from "./src/config/site.ts";
+import { buildMetaTags, buildOrganizationJsonLd } from "./src/config/site.ts";
+import { buildBreadcrumbJsonLd, notFoundMeta, pages, type PageMeta } from "./src/config/routes.ts";
 import { buildHeadersFile, buildSecurityHeaders } from "./src/config/securityHeaders.ts";
 
 const DEFAULT_SITE_URL = "http://localhost:8080";
 
-// Rutas públicas indexables; se publican en sitemap.xml.
-const sitemapRoutes = [
-  { path: "/", changefreq: "monthly", priority: "1.0" },
-  { path: "/empresa", changefreq: "monthly", priority: "0.8" },
-  { path: "/servicios", changefreq: "monthly", priority: "0.9" },
-  { path: "/reuniones", changefreq: "weekly", priority: "0.8" },
-  { path: "/contacto", changefreq: "yearly", priority: "0.7" },
-  { path: "/politica-de-datos", changefreq: "yearly", priority: "0.3" },
-  { path: "/terminos", changefreq: "yearly", priority: "0.3" },
-];
+// ---------------------------------------------------------------------------
+// SEO: un HTML por ruta, 404.html, sitemap.xml y robots.txt
+// ---------------------------------------------------------------------------
+// Cada ruta de src/config/routes.ts recibe su propio HTML (empresa.html, contacto.html…) con
+// título, description, canonical, Open Graph y datos estructurados en el <head>, para los
+// rastreadores que no ejecutan JS (WhatsApp, Facebook). Cloudflare Pages sirve empresa.html en
+// /empresa y 404.html, con estado 404, para las rutas que no existen. Las etiquetas llevan
+// data-rh para que react-helmet-async (Seo) las reemplace al navegar dentro del sitio.
 
-// Inserta en index.html el título, las etiquetas description/og:/twitter: y el JSON-LD por
-// defecto, para los rastreadores que no ejecutan JS (WhatsApp, Facebook). Las etiquetas meta
-// llevan data-rh para que react-helmet-async (Seo) las reemplace en cada página.
-function seoHtmlTags(siteUrl: string): HtmlTagDescriptor[] {
-  const jsonLd = JSON.stringify(buildOrganizationJsonLd(siteUrl), null, 2).replace(/</g, "\\u003c");
-  return [
-    { tag: "title", children: seoDefaults.title, injectTo: "head" },
-    ...buildMetaTags(siteUrl, seoDefaults).map(
-      (attrs): HtmlTagDescriptor => ({ tag: "meta", attrs: { ...attrs, "data-rh": "true" }, injectTo: "head" }),
-    ),
-    { tag: "script", attrs: { type: "application/ld+json" }, children: jsonLd, injectTo: "head" },
+const SEO_START = "<!--seo:start-->";
+const SEO_END = "<!--seo:end-->";
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const ldJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
+
+function headFor(siteUrl: string, path: string, meta: PageMeta, preloads: string[]): string {
+  const url = `${siteUrl}${path}`;
+  const tags = [
+    `<title>${escapeHtml(meta.title)}</title>`,
+    `<link rel="canonical" href="${escapeHtml(url)}" data-rh="true" />`,
+    ...(meta.noindex ? [`<meta name="robots" content="noindex, nofollow" data-rh="true" />`] : []),
+    ...buildMetaTags(siteUrl, { title: meta.title, description: meta.description, url }).map((tag) => {
+      const [key, value] = "name" in tag ? ["name", tag.name] : ["property", tag.property];
+      return `<meta ${key}="${escapeHtml(value)}" content="${escapeHtml(tag.content)}" data-rh="true" />`;
+    }),
+    ...preloads,
+    `<script type="application/ld+json">${ldJson(buildOrganizationJsonLd(siteUrl))}</script>`,
   ];
+  const breadcrumb = meta.noindex ? null : buildBreadcrumbJsonLd(siteUrl, path);
+  if (breadcrumb) tags.push(`<script type="application/ld+json" data-rh="true">${ldJson(breadcrumb)}</script>`);
+  return `${SEO_START}\n    ${tags.join("\n    ")}\n    ${SEO_END}`;
 }
 
-// Genera las etiquetas SEO de index.html y, en el build, robots.txt y sitemap.xml.
+/** Archivo de salida de cada ruta: "/" → index.html, "/empresa" → empresa.html. */
+const htmlFileFor = (path: string) => (path === "/" ? "index.html" : `${path.slice(1)}.html`);
+
 function seoFiles(siteUrl: string): Plugin {
   const robots = `User-agent: *
 Allow: /
@@ -40,12 +53,15 @@ Disallow: /login
 
 Sitemap: ${siteUrl}/sitemap.xml
 `;
-  const urls = sitemapRoutes
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const urls = Object.entries(pages as Record<string, PageMeta>)
+    .filter(([, meta]) => meta.sitemap && !meta.noindex)
     .map(
-      (r) => `  <url>
-    <loc>${siteUrl}${r.path}</loc>
-    <changefreq>${r.changefreq}</changefreq>
-    <priority>${r.priority}</priority>
+      ([path, meta]) => `  <url>
+    <loc>${siteUrl}${path}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${meta.sitemap!.changefreq}</changefreq>
+    <priority>${meta.sitemap!.priority}</priority>
   </url>`,
     )
     .join("\n");
@@ -54,14 +70,65 @@ Sitemap: ${siteUrl}/sitemap.xml
 ${urls}
 </urlset>
 `;
+
+  let outDir = "dist";
   return {
     name: "seo-files",
-    transformIndexHtml() {
-      return seoHtmlTags(siteUrl);
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir);
+    },
+    // En dev y en el build, index.html lleva el <head> de Inicio entre marcadores.
+    transformIndexHtml(html) {
+      return html.replace("</head>", `    ${headFor(siteUrl, "/", pages["/"], [])}\n  </head>`);
     },
     generateBundle() {
       this.emitFile({ type: "asset", fileName: "robots.txt", source: robots });
       this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap });
+    },
+    // Con el bundle escrito se conocen los nombres con hash de fuentes e imágenes a precargar.
+    writeBundle(_options, bundle) {
+      const files = Object.keys(bundle);
+      const find = (pattern: RegExp) => files.find((f) => pattern.test(f));
+      const fontPreloads = [/open-sans-latin-400-normal-[\w-]+\.woff2$/, /open-sans-latin-600-normal-[\w-]+\.woff2$/]
+        .map(find)
+        .filter((f): f is string => !!f)
+        .map((f) => `<link rel="preload" href="/${f}" as="font" type="font/woff2" crossorigin />`);
+      // Primera foto del hero (LCP de Inicio): el navegador la pide antes de ejecutar el JS.
+      const hero640 = find(/hero-consulting-640-[\w-]+\.webp$/);
+      const hero1280 = find(/hero-consulting-1280-[\w-]+\.webp$/);
+      const heroPreload =
+        hero640 && hero1280
+          ? [
+              `<link rel="preload" as="image" type="image/webp" fetchpriority="high" imagesrcset="/${hero640} 640w, /${hero1280} 1280w" imagesizes="100vw" />`,
+            ]
+          : [];
+
+      const template = readFileSync(path.join(outDir, "index.html"), "utf8");
+      const block = new RegExp(`${SEO_START}[\\s\\S]*?${SEO_END}`);
+      const write = (file: string, head: string) =>
+        writeFileSync(path.join(outDir, file), template.replace(block, head));
+
+      for (const [route, meta] of Object.entries(pages as Record<string, PageMeta>)) {
+        const preloads = route === "/" ? [...fontPreloads, ...heroPreload] : fontPreloads;
+        write(htmlFileFor(route), headFor(siteUrl, route, meta, preloads));
+      }
+      write("404.html", headFor(siteUrl, "/404", notFoundMeta, fontPreloads));
+    },
+    // `vite preview` sirve los HTML como Cloudflare Pages: /empresa → empresa.html y las rutas
+    // desconocidas → 404.html con estado 404.
+    configurePreviewServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = new URL(req.url ?? "/", "http://localhost");
+        if (req.method !== "GET" || url.pathname === "/" || path.extname(url.pathname)) return next();
+        const file = htmlFileFor(url.pathname.replace(/\/+$/, ""));
+        if (existsSync(path.join(outDir, file))) {
+          req.url = `/${file}${url.search}`;
+          return next();
+        }
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.end(readFileSync(path.join(outDir, "404.html")));
+      });
     },
   };
 }

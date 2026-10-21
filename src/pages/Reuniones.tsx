@@ -4,14 +4,9 @@ import TestimonialsSection from "@/features/testimonials/components/Testimonials
 
 const Reuniones = () => (
   <>
-    <Seo
-      title="Reuniones y sesiones de asesoría empresarial | AME S.A.S."
-      description="Reuniones, asesorías y actividades de AME S.A.S. con microempresarios de Cúcuta y Norte de Santander."
-      path="/reuniones"
-      noindex
-    />
+    <Seo path="/reuniones" />
     <section className="bg-ame-dark py-16 px-6 md:px-8 text-center">
-      <span className="text-sm font-semibold text-primary">Actividades</span>
+      <span className="text-sm font-semibold text-[#5DCAA5]">Actividades</span>
       <h1 className="text-4xl md:text-5xl font-semibold text-primary-foreground mt-3 mb-4">
         Reuniones y Asesorías
       </h1>
