@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/useAuth";
 import { Button } from "@/components/ui/button";
@@ -21,28 +21,15 @@ const tabs = [
 type TabId = (typeof tabs)[number]["id"];
 
 const Admin = () => {
-  const { user, isAdmin, loading: authLoading, signOut } = useAuth();
+  // RequireAdmin garantiza que aquí ya hay sesión de admin.
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
-
-  useEffect(() => {
-    if (!authLoading && (!user || !isAdmin)) {
-      navigate("/login");
-    }
-  }, [user, isAdmin, authLoading, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Cargando...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

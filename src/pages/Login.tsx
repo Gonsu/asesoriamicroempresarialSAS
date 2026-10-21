@@ -1,6 +1,6 @@
 import Seo from "@/components/Seo";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/useAuth";
@@ -10,12 +10,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Lock } from "lucide-react";
 import { FieldError } from "@/components/QueryState";
+import type { LoginRedirectState } from "@/components/RequireAdmin";
 import { loginSchema, type LoginFormValues } from "@/features/auth/schema";
 
 const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { user, isAdmin, loading: authLoading, signIn, signInWithGoogle, signOut } = useAuth();
   const navigate = useNavigate();
+  const reason = (useLocation().state as LoginRedirectState | null)?.reason;
   const { toast } = useToast();
   const {
     register,
@@ -91,6 +93,12 @@ const Login = () => {
             <h1 className="text-2xl font-bold text-foreground">Panel Administrativo</h1>
             <p className="text-muted-foreground text-sm mt-1">AME S.A.S. — Acceso exclusivo</p>
           </div>
+
+          {reason === "idle" && !user && (
+            <div role="status" className="mb-6 rounded-lg border border-border bg-muted/50 p-4 text-sm text-foreground">
+              Tu sesión se cerró tras 30 minutos sin actividad. Vuelve a iniciar sesión.
+            </div>
+          )}
 
           {!authLoading && user && !isAdmin && (
             <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">

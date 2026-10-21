@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import RequireAdmin from "@/components/RequireAdmin";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index.tsx";
 
@@ -43,7 +44,14 @@ const AppRoutes = () => {
             <Route path="/contacto" element={<Contacto />} />
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route
+            path="/admin"
+            element={
+              <RequireAdmin>
+                <Admin />
+              </RequireAdmin>
+            }
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { AuthContext } from "@/contexts/auth-context";
+import { clearAdminActivity, markAdminActivity } from "@/hooks/useIdleLogout";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -83,12 +84,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) markAdminActivity();
     return { error: error as Error | null };
   };
 
   // Solo entra si la cuenta ya existe: el registro público está desactivado en Supabase.
   // Vuelve a /login, que muestra el error o redirige a /admin según el rol.
   const signInWithGoogle = async () => {
+    // La marca se pone antes de salir hacia Google; al volver, la sesión empieza activa.
+    markAdminActivity();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/login` },
@@ -98,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    clearAdminActivity();
     setIsAdmin(false);
   };
 
